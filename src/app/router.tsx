@@ -3,10 +3,11 @@ import ProtectedRoute from "../components/protected-route";
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from "react-router";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { paths } from "../config/paths";
-import Landing from "./routes/landing";
-import AliveBookings from "./routes/aliveBookings";
-import UserBookings from "./routes/userBookings";
+import Landing from "./routes/app/landing";
+import AliveBookings from "./routes/app/aliveBookings";
+import UserBookings from "./routes/app/userBookings";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convert = (queryClient: QueryClient) => (module: any) => {
   const { clientLoader, clientAction, default: Component, ...rest } = module;
   return {
@@ -54,7 +55,7 @@ const createAppRouter = (queryClient: QueryClient) =>
             </ProtectedRoute>
           ),
           lazy: () =>
-            import("./routes/aliveBookings").then(convert(queryClient)),
+            import("./routes/app/aliveBookings").then(convert(queryClient)),
         },
         {
           path: paths.app.bookings.user.path,
@@ -64,7 +65,7 @@ const createAppRouter = (queryClient: QueryClient) =>
             </ProtectedRoute>
           ),
           lazy: () =>
-            import("./routes/userBookings").then(convert(queryClient)),
+            import("./routes/app/userBookings").then(convert(queryClient)),
         },
       ],
     },

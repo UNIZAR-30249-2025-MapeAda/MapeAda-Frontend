@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button } from "react-bootstrap";
-import BookModal from "../../features/bookings/components/book-modal";
-import { Map } from "../../components/ui/map";
-import { Navbar } from "../../components/ui/navbar";
+import BookModal from "../../../features/bookings/components/book-modal";
+import { Map } from "../../../components/ui/map";
+import { Navbar } from "../../../components/ui/navbar";
 
 function Landing() {
   const [showBookModal, setShowBookModal] = useState(false);
