@@ -7,20 +7,21 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC } from "react";
 import { Link, useNavigate } from "react-router";
-import { useAuth } from "../../lib/auth";
-import { ADMIN_ROLE } from "../../common/constants";
 import { paths } from "../../config/paths";
+import { ADMIN_ROLE } from "../../config/constants";
+import { useUser, useLogout } from "../../lib/auth";
 
 interface UserMenuProps {
   className?: string;
 }
 
 export const UserMenu: FC<UserMenuProps> = ({ className = "" }) => {
-  const { user, logout } = useAuth();
+  const user = useUser();
+  const logout = useLogout();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
+    logout.mutate(undefined);
     navigate(paths.auth.login.getHref());
   };
 
@@ -43,21 +44,21 @@ export const UserMenu: FC<UserMenuProps> = ({ className = "" }) => {
       >
         <div className="d-flex mb-2">
           <div className="col-1" />
-          <span className="text-muted col">user@example.com</span>
+          <span className="text-muted col">{user.data?.email}</span>
           <button
             type="button"
             className="btn-close col-1"
             aria-label="Close"
           ></button>
         </div>
-        <span className="fs-5 fw-bold">¡Hola User!</span>
+        <span className="fs-5 fw-bold">¡Hola {user.data?.username}!</span>
         <div className="bg-white rounded mt-3">
           <Link to={paths.app.bookings.user.getHref("1")} className="btn pt-3">
             <FontAwesomeIcon icon={faBookmark} className="me-3" />
             <span>Mis Reservas</span>
           </Link>
           <hr className="dropdown-divider mx-3" />
-          {user?.role == ADMIN_ROLE && (
+          {user.data?.role == ADMIN_ROLE && (
             <>
               <Link to={paths.app.bookings.alive.getHref()} className="btn">
                 <FontAwesomeIcon icon={faEye} className="me-3" />

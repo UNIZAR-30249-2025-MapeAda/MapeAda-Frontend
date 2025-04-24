@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Spinner } from "react-bootstrap";
-import { AuthProvider } from "../lib/auth";
+import { AuthLoader } from "../lib/auth";
 import { ErrorBoundary } from "react-error-boundary";
 import { MainErrorFallback } from "../components/errors/main";
 
@@ -17,7 +17,15 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <QueryClientProvider client={queryClient}>
           {/*import.meta.env.DEV && <ReactQueryDevtools />*/}
-          <AuthProvider>{children}</AuthProvider>
+          <AuthLoader
+            renderLoading={() => (
+              <div className="flex h-screen w-screen items-center justify-center">
+                <Spinner />
+              </div>
+            )}
+          >
+            {children}
+          </AuthLoader>
         </QueryClientProvider>
       </ErrorBoundary>
     </Suspense>

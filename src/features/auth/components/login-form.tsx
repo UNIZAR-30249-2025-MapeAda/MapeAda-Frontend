@@ -1,32 +1,35 @@
 import React, { useState } from "react";
-import { login } from "../../../services/authService";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router";
-import { useAuth } from "../../../lib/auth";
 import { paths } from "../../../config/paths";
+import { loginInputSchema, useLogin } from "../../../lib/auth";
 
 const LoginForm = () => {
-  const { loginUser } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ email: "" });
+  const login = useLogin({
+    onSuccess: () => {
+      navigate(paths.app.root.getHref());
+    },
+    onError: (error: unknown) => {
+      Swal.fire("Error", String(error), "error");
+    },
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      const user = await login(form);
-      loginUser(user);
-      navigate(paths.app.root.getHref());
-    } catch (error) {
-      Swal.fire("Error", String(error), "error");
-    } finally {
-      setLoading(false);
+    const parsed = loginInputSchema.safeParse(form);
+
+    if (!parsed.success) {
+      Swal.fire("Error", "Introduce un email válido", "error");
+      return;
     }
+
+    login.mutate(form);
   };
 
   return (
@@ -48,9 +51,9 @@ const LoginForm = () => {
       <button
         type="submit"
         className="btn btn-warning shadow-sm rounded-pill w-100"
-        disabled={loading}
+        disabled={login.isPending}
       >
-        {loading ? "Cargando..." : "Iniciar sesión"}
+        {login.isPending ? "Cargando..." : "Iniciar sesión"}
       </button>
     </form>
   );

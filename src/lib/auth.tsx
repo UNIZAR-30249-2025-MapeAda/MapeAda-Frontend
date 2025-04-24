@@ -1,51 +1,67 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import { User } from "../services/authService";
+import { configureAuth } from "react-query-auth";
+import { api } from "./api-client";
+import { LoginResponseDto, MeResponseDto } from "../types/api";
+import { z } from "zod";
+import { ADMIN_ROLE } from "../config/constants";
 
-interface AuthContextProps {
-  user: User | null;
-  loginUser: (user: User) => void;
-  logout: () => void;
-}
+const getUser = async (): Promise<MeResponseDto> => {
+  /*
+  const { data } = await api.get<MeResponseDto>("/auth/me");
+  return data;
+  */
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-
-  const loginUser = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
+  return {
+    nip: "000000",
+    email: "admin@example.com",
+    username: "MockedAdmin",
+    role: ADMIN_ROLE,
   };
+};
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  };
+const logout = (): Promise<void> => api.post("/auth/logout");
 
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-    }
-  }, [user]);
+export const loginInputSchema = z.object({
+  email: z.string().min(1, "Necesario").email("Email inválido"),
+});
+export type LoginInput = z.infer<typeof loginInputSchema>;
 
-  return (
-    <AuthContext.Provider value={{ user, loginUser, logout }}>
-      {children}
-    </AuthContext.Provider>
+const login = async (data: LoginInput): Promise<LoginResponseDto> => {
+  /*
+  const { data: loginResponse } = await api.post<LoginResponseDto>(
+    "/auth/login",
+    data
   );
+
+  api.defaults.headers.common[
+    "Authorization"
+  ] = `Bearer ${loginResponse.token}`;
+  return loginResponse;
+  */
+
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  return {
+    token: "fake-jwt-token",
+    user: {
+      nip: "000000",
+      email: data.email,
+      username: "MockedAdmin",
+      role: ADMIN_ROLE,
+    },
+  };
 };
 
-export const useAuth = (): AuthContextProps => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
-  return context;
+const authConfig = {
+  userFn: getUser,
+  loginFn: async (data: LoginInput) => {
+    const response = await login(data);
+    return response.user;
+  },
+  registerFn: async () => {
+    return null;
+  },
+  logoutFn: logout,
 };
+
+export const { useUser, useLogin, useLogout, AuthLoader } =
+  configureAuth(authConfig);

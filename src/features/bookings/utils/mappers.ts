@@ -1,13 +1,21 @@
-import { AliveBookingResponseDto, UserBookingResponseDto } from "../../../types/api";
-import { AliveBooking, bookingStatuses, bookingUsages, UserBooking } from "../types/booking";
+import {
+  AliveBookingResponseDto,
+  UserBookingResponseDto,
+} from "../../../types/api";
+import { bookingUsages, bookingStatuses } from "../types/enums";
+import { AliveBooking, UserBooking } from "../types/models";
 
-export const mapAliveBookingResponseDtoToAliveBooking = (dto: AliveBookingResponseDto): AliveBooking => ({
+export const mapAliveBookingResponseDtoToAliveBooking = (
+  dto: AliveBookingResponseDto
+): AliveBooking => ({
   ...dto,
   usage: bookingUsages[dto.usage],
   status: bookingStatuses[dto.status],
 });
 
-export const mapUserBookingResponseDtoToUserBooking = (dto: UserBookingResponseDto): UserBooking => ({
+export const mapUserBookingResponseDtoToUserBooking = (
+  dto: UserBookingResponseDto
+): UserBooking => ({
   ...dto,
   usage: bookingUsages[dto.usage],
   status: bookingStatuses[dto.status],

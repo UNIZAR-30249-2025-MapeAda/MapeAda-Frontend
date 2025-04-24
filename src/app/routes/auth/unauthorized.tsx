@@ -14,7 +14,7 @@ const Unauthorized = () => {
             No tienes permiso para acceder a esta página.
           </p>
           <Link to="/" className="btn btn-warning shadow-sm rounded-pill">
-            Volver al inicio
+            Volver
           </Link>
         </div>
       </div>

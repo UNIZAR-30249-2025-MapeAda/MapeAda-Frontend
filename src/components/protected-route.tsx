@@ -1,21 +1,27 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router";
-import { useAuth } from "../lib/auth";
-import { Role } from "../common/constants";
+import { useLocation, Navigate } from "react-router";
 import { paths } from "../config/paths";
+import { useUser } from "../lib/auth";
+import { Role } from "../config/constants";
 
 interface ProtectedRouteProps {
   allowedRoles: readonly Role[];
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }
 
-const ProtectedRoute = ({ allowedRoles, children }: ProtectedRouteProps) => {
-  const { user } = useAuth();
+export const ProtectedRoute = ({
+  allowedRoles,
+  children,
+}: ProtectedRouteProps) => {
+  const user = useUser();
+  const location = useLocation();
 
-  if (!user || !allowedRoles.includes(user.role))
-    return <Navigate to={paths.auth.unauthorized.getHref()} replace />;
+  if (!user.data || !allowedRoles.includes(user.data.role))
+    return (
+      <Navigate
+        to={paths.auth.unauthorized.getHref(location.pathname)}
+        replace
+      />
+    );
 
-  return children ? <>{children}</> : <Outlet />;
+  return children;
 };
-
-export default ProtectedRoute;

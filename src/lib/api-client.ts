@@ -23,7 +23,7 @@ api.interceptors.response.use(
       const searchParams = new URLSearchParams();
       const redirectTo =
         searchParams.get("redirectTo") || window.location.pathname;
-      window.location.href = paths.auth.login.getHref(redirectTo);
+      window.location.href = paths.auth.unauthorized.getHref(redirectTo);
     }
 
     return Promise.reject(error);

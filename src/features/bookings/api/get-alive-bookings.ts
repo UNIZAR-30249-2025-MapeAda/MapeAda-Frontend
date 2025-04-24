@@ -1,7 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { api } from "../../../lib/api-client";
 import { QueryConfig } from "../../../lib/react-query";
-import { AliveBooking } from "../types/booking";
+import { AliveBooking } from "../types/models";
 import { AliveBookingResponseDto } from "../../../types/api";
 import { mapAliveBookingResponseDtoToAliveBooking } from "../utils/mappers";
 
@@ -9,7 +9,7 @@ const mockBookings: AliveBookingResponseDto[] = [
   {
     id: 1,
     userNip: "840091",
-    places: ["L0.01", "A.02"],
+    spaces: ["L0.01", "A.02"],
     date: "13/05/2025",
     startTime: "10:00",
     endTime: "11:00",
@@ -21,7 +21,7 @@ const mockBookings: AliveBookingResponseDto[] = [
   {
     id: 2,
     userNip: "840092",
-    places: ["L1.03"],
+    spaces: ["L1.03"],
     date: "14/05/2025",
     startTime: "09:00",
     endTime: "10:30",

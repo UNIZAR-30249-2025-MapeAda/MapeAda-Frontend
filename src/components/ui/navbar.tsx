@@ -1,14 +1,25 @@
 import { FC, useState, ChangeEvent } from "react";
 import { Select } from "./select";
-import { UserMenu } from "./userMenu";
+import { UserMenu } from "./user-menu";
 import SearchBar from "./search-bar";
+import {
+  spaceCategories,
+  SpaceCategory,
+} from "../../features/spaces/types/enums";
 
 interface NavbarProps {
   showBookModal?: boolean;
 }
 
-export const Navbar: FC<NavbarProps> = ({ showBookModal: showMultiStep = false }) => {
+export const Navbar: FC<NavbarProps> = ({
+  showBookModal: showMultiStep = false,
+}) => {
+  const [currentCategory, setCurrentCategory] = useState<SpaceCategory>();
   const [capacityText, setCapacityText] = useState("");
+
+  const handleCategoryChange = (newCategory: SpaceCategory) => {
+    setCurrentCategory(newCategory);
+  };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setCapacityText(event.target.value);
@@ -26,23 +37,21 @@ export const Navbar: FC<NavbarProps> = ({ showBookModal: showMultiStep = false }
         <Select
           options={[
             { value: "categoria", label: "Categoría" },
-            { value: "laboratorio", label: "Laboratorio" },
-            { value: "despacho", label: "Despacho" },
-            { value: "aula", label: "Aula" },
-            { value: "seminario", label: "Seminario" },
-            { value: "salaComun", label: "Sala común" },
-            { value: "salonActos", label: "Salón de actos" },
-            { value: "salaReunion", label: "Sala de reunión" },
-            { value: "salaInformatica", label: "Sala informática" },
+            ...spaceCategories.map((status) => ({
+              value: status,
+              label: status,
+            })),
           ]}
           initialValue="categoria"
-          onChange={(newValue) => console.log(newValue)}
+          onChange={(newValue) =>
+            handleCategoryChange(newValue as SpaceCategory)
+          }
         />
         <input
           type="text"
           className="form-control rounded-pill border-0 ps-3 w-auto shadow"
-          placeholder="Capacidad"
-          aria-label="Capacidad"
+          placeholder="Capacidad máxima"
+          aria-label="Capacidad máxima"
           value={capacityText}
           onChange={handleInputChange}
           onKeyDown={(newValue) => console.log(newValue)}

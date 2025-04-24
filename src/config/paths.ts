@@ -1,41 +1,46 @@
-import { ADMIN_ROLE, ALL_ROLES } from "../common/constants";
+import { ADMIN_ROLE, ALL_ROLES } from "./constants";
 
 export const paths = {
   home: {
-    path: '/',
-    getHref: () => '/',
+    path: "/",
+    getHref: () => "/",
   },
 
   auth: {
     login: {
-      path: '/auth/login',
+      path: "/auth/login",
       getHref: (redirectTo?: string | null | undefined) =>
-        `/auth/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
+        `/auth/login${
+          redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""
+        }`,
     },
     unauthorized: {
-      path: '/auth/unauthorized',
-      getHref: () => '/auth/unauthorized',
+      path: "/auth/unauthorized",
+      getHref: (redirectTo?: string | null | undefined) =>
+        `/auth/unauthorized${
+          redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""
+        }`,
     },
   },
 
   app: {
     root: {
-      path: '/app',
-      getHref: () => '/app',
+      path: "/app",
+      getHref: () => "/app",
       allowedRoles: ALL_ROLES,
     },
     dashboard: {
-      path: '',
-      getHref: () => '/app',
+      path: "",
+      getHref: () => "/app",
     },
     bookings: {
       alive: {
-        path: 'reservas',
-        getHref: () => '/app/reservas',
+        path: "reservas",
+        getHref: () => "/app/reservas",
         allowedRoles: [ADMIN_ROLE],
       },
       user: {
-        path: 'reservas/:userId',
+        path: "reservas/:userId",
         getHref: (userId: string) => `/app/reservas/${userId}`,
         allowedRoles: ALL_ROLES,
       },

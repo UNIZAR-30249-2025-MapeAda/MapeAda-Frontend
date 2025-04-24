@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal } from "react-bootstrap";
+import { Modal, Spinner } from "react-bootstrap";
 import { Stepper } from "react-form-stepper";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,13 +8,15 @@ import DateStep from "./date-step";
 import DurationStep from "./duration-step";
 import BookInfoStep from "./book-info-step";
 import SummaryStep from "./summary-step";
+import { useGetSpaceScheduleAndBookings } from "../hooks/use-get-space-schedule-and-bookings";
 
 interface BookModalProps {
+  spaces: string[];
   show: boolean;
   handleClose: () => void;
 }
 
-const BookModal: React.FC<BookModalProps> = ({ show, handleClose }) => {
+const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
   const totalSteps = 4;
   const [currentStep, setCurrentStep] = useState(0);
   const [fecha, setFecha] = useState<string>("");
@@ -22,6 +24,12 @@ const BookModal: React.FC<BookModalProps> = ({ show, handleClose }) => {
   const [uso, setUso] = useState<string>("");
   const [asistentes, setAsistentes] = useState(0);
   const [detallesAdicionales, setDetallesAdicionales] = useState<string>("");
+
+  const {
+    data: schedule,
+    isLoading,
+    error,
+  } = useGetSpaceScheduleAndBookings(spaces);
 
   const isStepValid = () => {
     switch (currentStep) {
@@ -48,27 +56,69 @@ const BookModal: React.FC<BookModalProps> = ({ show, handleClose }) => {
     }
   };
 
-  const confirm = () => {
+  const closeModal = async () => {
+    const result = await Swal.fire({
+      title: "¡Atención!",
+      text: "Si sale se perderá la información ingresada.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Salir",
+      cancelButtonText: "Continuar",
+      reverseButtons: true,
+      customClass: {
+        confirmButton: "btn btn-danger ms-2",
+        cancelButton: "btn btn-secondary",
+      },
+    });
+
+    if (result.isConfirmed) {
+      resetInfo();
+      handleClose();
+    }
+  };
+
+  const resetInfo = () => {
     setCurrentStep(0);
     setFecha("");
     setDuracion("");
     setUso("");
     setAsistentes(0);
     setDetallesAdicionales("");
+    setCurrentStep(0);
+  };
+
+  const confirm = () => {
+    resetInfo();
     handleClose();
-    Swal.fire({
-      title: "¡Completada!",
-      text: "Su reserva se ha realizado con éxito.",
-      icon: "success",
-    });
+    Swal.fire(
+      "¡Completada!",
+      "Su reserva se ha realizado con éxito.",
+      "success"
+    );
   };
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <DateStep fecha={fecha} setFecha={setFecha} />;
+        return (
+          <DateStep
+            fecha={fecha}
+            setFecha={setFecha}
+            defaultSchedule={schedule!.defaultSchedule}
+            restrictions={schedule!.restrictions}
+          />
+        );
       case 1:
-        return <DurationStep duracion={duracion} setDuracion={setDuracion} />;
+        return (
+          <DurationStep
+            fecha={fecha}
+            duracion={duracion}
+            setDuracion={setDuracion}
+            bookings={schedule!.bookings.filter((b) => b.date === fecha)}
+            defaultSchedule={schedule!.defaultSchedule}
+            restrictions={schedule!.restrictions}
+          />
+        );
       case 2:
         return (
           <BookInfoStep
@@ -83,6 +133,7 @@ const BookModal: React.FC<BookModalProps> = ({ show, handleClose }) => {
       case 3:
         return (
           <SummaryStep
+            espacios={spaces}
             fecha={fecha}
             duracion={duracion}
             uso={uso}
@@ -96,10 +147,30 @@ const BookModal: React.FC<BookModalProps> = ({ show, handleClose }) => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <Modal show={show} onHide={handleClose} centered backdrop="static">
+        <Modal.Body className="text-center p-5">
+          <Spinner animation="border" /> Cargando horarios…
+        </Modal.Body>
+      </Modal>
+    );
+  }
+
+  if (error) {
+    return (
+      <Modal show={show} onHide={handleClose} centered backdrop="static">
+        <Modal.Body className="text-center text-danger p-5">
+          Error al cargar los horarios.
+        </Modal.Body>
+      </Modal>
+    );
+  }
+
   return (
     <Modal
       show={show}
-      onHide={handleClose}
+      onHide={closeModal}
       centered
       dialogClassName="modal-xl"
       backdrop="static"

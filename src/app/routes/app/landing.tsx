@@ -7,6 +7,8 @@ import { Navbar } from "../../../components/ui/navbar";
 function Landing() {
   const [showBookModal, setShowBookModal] = useState(false);
 
+  const spaces = ["L0.01", "A.02"];
+  
   return (
     <>
       <Navbar showBookModal={showBookModal} />
@@ -26,6 +28,7 @@ function Landing() {
       </div>
       <Map />
       <BookModal
+        spaces={spaces}
         show={showBookModal}
         handleClose={() => {
           setShowBookModal(false);

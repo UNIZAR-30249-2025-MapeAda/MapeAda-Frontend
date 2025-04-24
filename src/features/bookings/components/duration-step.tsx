@@ -1,89 +1,159 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  DailyScheduleResponseDto,
+  ScheduleRestrictionResponseDto,
+  SpaceBookingsResponseDto,
+} from "../../../types/api";
+import { parseMinutes, formatMinutes } from "../../../utils/format";
 
 interface DurationStepProps {
+  fecha: string;
   duracion: string;
   setDuracion: (value: string) => void;
+  defaultSchedule: DailyScheduleResponseDto[];
+  restrictions: ScheduleRestrictionResponseDto[];
+  bookings: SpaceBookingsResponseDto[];
 }
 
-const horas = [
-  ["8:00", "9:00", "10:00"],
-  ["11:00", "12:00", "13:00"],
-  ["14:00", "15:00", "16:00"],
-  ["17:00", "18:00", "19:00"],
-  ["20:00", "21:00", ""],
-];
-const horasPlanas = horas.flat().filter(Boolean);
-
-const horasNoDisponibles = ["9:00", "15:00", "19:00"];
-
 const DurationStep: React.FC<DurationStepProps> = ({
+  fecha,
   duracion,
   setDuracion,
+  defaultSchedule,
+  restrictions,
+  bookings,
 }) => {
-  const [seleccionadas, setSeleccionadas] = useState<string[]>(
+  const [slots, setSlots] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(
     duracion ? duracion.split(",") : []
   );
 
-  const toggleHora = (hora: string) => {
-    if (!hora || horasNoDisponibles.includes(hora)) return;
+  const bookingRanges = bookings.map((b) => ({
+    start: parseMinutes(b.startTime),
+    end: parseMinutes(b.endTime),
+  }));
 
-    if (seleccionadas.includes(hora)) {
-      const nuevas = seleccionadas.filter((h) => h !== hora);
-      setSeleccionadas(nuevas);
-      setDuracion(nuevas.join(","));
+  useEffect(() => {
+    if (!fecha) {
+      setSlots([]);
+      return;
+    }
+    const date = new Date(fecha);
+    const dow = date.getDay();
+    const rest = restrictions.find((r) => r.date === fecha);
+
+    let startMin: number, endMin: number;
+    if (rest && !rest.isHoliday && rest.startTime && rest.endTime) {
+      startMin = parseMinutes(rest.startTime);
+      endMin = parseMinutes(rest.endTime);
+    } else {
+      const daily = defaultSchedule.find((ds) => ds.dayOfWeek === dow);
+      startMin = daily ? parseMinutes(daily.startTime) : 0;
+      endMin = daily ? parseMinutes(daily.endTime) : 0;
+    }
+
+    if (rest?.isHoliday) {
+      setSlots([]);
       return;
     }
 
-    if (seleccionadas.length === 0) {
-      setSeleccionadas([hora]);
-      setDuracion(hora);
-      return;
+    const generated: string[] = [];
+    for (let t = startMin; t + 60 <= endMin; t += 60) {
+      generated.push(formatMinutes(t));
     }
 
-    const indexHora = horasPlanas.indexOf(hora);
-    const indicesSeleccionadas = seleccionadas.map((h) =>
-      horasPlanas.indexOf(h)
-    );
+    setSlots(generated);
 
-    const esAdyacente = indicesSeleccionadas.some(
-      (i) => i === indexHora - 1 || i === indexHora + 1
-    );
+    const filtered = selected.filter((h) => {
+      const m = parseMinutes(h);
+      if (!generated.includes(h)) return false;
+      return !bookingRanges.some((r) => m >= r.start && m < r.end);
+    });
 
-    if (esAdyacente) {
-      const nuevas = [...seleccionadas, hora].sort(
-        (a, b) => horasPlanas.indexOf(a) - horasPlanas.indexOf(b)
-      );
-      setSeleccionadas(nuevas);
-      setDuracion(nuevas.join(","));
+    setSelected(filtered);
+    setDuracion(filtered.join(","));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fecha, defaultSchedule, restrictions, bookings]);
+
+  const toggle = (hour: string) => {
+    const m = parseMinutes(hour);
+    if (bookingRanges.some((r) => m >= r.start && m < r.end)) return;
+
+    let next: string[];
+    if (selected.includes(hour)) {
+      next = selected.filter((h) => h !== hour);
+    } else {
+      if (selected.length === 0) {
+        next = [hour];
+      } else {
+        const indices = selected.map((h) => slots.indexOf(h));
+        const idx = slots.indexOf(hour);
+        if (indices.some((i) => i === idx - 1 || i === idx + 1)) {
+          next = [...selected, hour].sort(
+            (a, b) => slots.indexOf(a) - slots.indexOf(b)
+          );
+        } else {
+          return;
+        }
+      }
     }
+    setSelected(next);
+    setDuracion(next.join(","));
   };
 
+  if (!fecha) {
+    return <p className="text-muted">Seleccione una fecha primero.</p>;
+  }
+
+  if (slots.length === 0) {
+    return <p className="text-danger">No hay franjas disponibles.</p>;
+  }
+
+  const columns = 3;
+  const rows: string[][] = [];
+  for (let i = 0; i < slots.length; i += columns) {
+    rows.push(slots.slice(i, i + columns));
+  }
   return (
     <table className="table table-bordered">
       <tbody>
-        {horas.map((fila, i) => (
-          <tr key={i}>
-            {fila.map((hora, j) => (
-              <td
-                key={j}
-                className={
-                  horasNoDisponibles.includes(hora)
-                    ? "bg-light text-muted"
-                    : seleccionadas.includes(hora)
-                    ? "bg-success text-white cursor-pointer"
-                    : "bg-transparent cursor-pointer"
-                }
-                style={{
-                  cursor:
-                    horasNoDisponibles.includes(hora) || !hora
-                      ? "default"
-                      : "pointer",
-                }}
-                onClick={() => toggleHora(hora)}
-              >
-                {hora}
-              </td>
-            ))}
+        {rows.map((rowSlots, rowIndex) => (
+          <tr key={rowIndex}>
+            {rowSlots.map((hour) => {
+              const m = parseMinutes(hour);
+              const isBooked = bookingRanges.some(
+                (r) => m >= r.start && m < r.end
+              );
+              const isSelected = selected.includes(hour);
+
+              let className = "";
+              const style: React.CSSProperties = {};
+
+              if (isBooked) {
+                className = "bg-light text-muted";
+                style.cursor = "not-allowed";
+              } else if (isSelected) {
+                className = "bg-success text-white";
+                style.cursor = "pointer";
+              } else {
+                style.cursor = "pointer";
+              }
+
+              return (
+                <td
+                  key={hour}
+                  className={className}
+                  style={style}
+                  onClick={() => toggle(hour)}
+                >
+                  {hour}
+                </td>
+              );
+            })}
+            {rowSlots.length < columns &&
+              Array(columns - rowSlots.length)
+                .fill(null)
+                .map((_, idx) => <td key={`empty-${idx}`} />)}
           </tr>
         ))}
       </tbody>

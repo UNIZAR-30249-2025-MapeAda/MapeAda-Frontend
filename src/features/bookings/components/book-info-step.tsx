@@ -1,5 +1,6 @@
 import React, { ChangeEvent } from "react";
 import { Select } from "../../../components/ui/select";
+import { bookingUsages } from "../types/enums";
 
 interface BookInfoStepProps {
   uso: string;
@@ -24,12 +25,10 @@ const BookInfoStep: React.FC<BookInfoStepProps> = ({
       <div className="d-flex flex-column text-start gap-3 col">
         <span>Tipo de uso</span>
         <Select
-          options={[
-            { value: "docencia", label: "Docencia" },
-            { value: "investigacion", label: "Investigación" },
-            { value: "gestion", label: "Gestión" },
-            { value: "otros", label: "Otros" },
-          ]}
+          options={bookingUsages.map((usage) => ({
+            value: usage,
+            label: usage,
+          }))}
           placeholder="Tipo de uso"
           initialValue={uso}
           onChange={(newValue) => setUso(newValue)}

@@ -20,3 +20,16 @@ export const formatDuration = (duracionRaw: string) => {
 
   return `${horas[0]} a ${getSiguienteHora(horas[horas.length - 1])}`;
 };
+
+export const parseMinutes = (hhmm: string) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+};
+
+export const formatMinutes = (total: number) => {
+  const h = Math.floor(total / 60)
+    .toString()
+    .padStart(2, "0");
+  const m = (total % 60).toString().padStart(2, "0");
+  return `${h}:${m}`;
+};

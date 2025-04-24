@@ -2,6 +2,7 @@ import React from "react";
 import { formatDate, formatDuration } from "../../../utils/format";
 
 interface SummaryStepProps {
+  espacios: string[];
   fecha: string;
   duracion: string;
   uso: string;
@@ -11,19 +12,19 @@ interface SummaryStepProps {
 }
 
 const SummaryStep: React.FC<SummaryStepProps> = ({
+  espacios,
   fecha,
   duracion,
   uso,
   asistentes,
   detallesAdicionales,
 }) => {
-
   return (
     <div className="d-flex">
       <div className="col-4"></div>
       <div className="col text-start">
         <p>
-          <strong>Espacios reservados:</strong> Nombres de los espacios
+          <strong>Espacios reservados:</strong> {espacios.join(", ")}
         </p>
         <p>
           <strong>Fecha:</strong> {formatDate(fecha) || "No seleccionada"}
