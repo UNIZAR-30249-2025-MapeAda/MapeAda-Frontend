@@ -14,6 +14,15 @@ export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5157",
 });
 
+export const apiPygeoapi = axios.create({
+  baseURL: "http://localhost:5000",
+});
+
+apiPygeoapi.interceptors.request.use((config) => {
+  console.log("[apiPygeoapi] REQUEST 👉", config.method, config.baseURL + config.url, config.params);
+  return config;
+});
+
 api.interceptors.request.use(authRequestInterceptor);
 
 api.interceptors.response.use(

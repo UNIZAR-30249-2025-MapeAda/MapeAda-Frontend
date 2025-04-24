@@ -1,6 +1,3 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { api } from "../../../lib/api-client";
-import { QueryConfig } from "../../../lib/react-query";
 import { AliveBooking } from "../types/models";
 import { AliveBookingResponseDto } from "../../../types/api";
 import { mapAliveBookingResponseDtoToAliveBooking } from "../utils/mappers";
@@ -39,23 +36,4 @@ export const getAliveBookings = async (): Promise<AliveBooking[]> => {
   );
 
   return bookings.map(mapAliveBookingResponseDtoToAliveBooking);
-};
-
-export const getAliveBookingsQueryOptions = () =>
-  queryOptions({
-    queryKey: ["bookings", "alive"],
-    queryFn: getAliveBookings,
-  });
-
-type UseAliveBookingsOptions = {
-  queryConfig?: QueryConfig<typeof getAliveBookingsQueryOptions>;
-};
-
-export const useAliveBookings = ({
-  queryConfig,
-}: UseAliveBookingsOptions = {}) => {
-  return useQuery({
-    ...getAliveBookingsQueryOptions(),
-    ...queryConfig,
-  });
 };
