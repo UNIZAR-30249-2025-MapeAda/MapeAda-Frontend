@@ -7,13 +7,7 @@ import {
   SpaceCategory,
 } from "../../features/spaces/types/enums";
 
-interface NavbarProps {
-  showBookModal?: boolean;
-}
-
-export const Navbar: FC<NavbarProps> = ({
-  showBookModal: showMultiStep = false,
-}) => {
+export const Navbar: FC = () => {
   const [currentCategory, setCurrentCategory] = useState<SpaceCategory>();
   const [capacityText, setCapacityText] = useState("");
 
@@ -28,7 +22,7 @@ export const Navbar: FC<NavbarProps> = ({
   return (
     <nav
       className="col-12 d-flex position-absolute top-0 start-0 p-3"
-      style={showMultiStep ? undefined : { zIndex: 10000 }}
+      style={{ zIndex: 10000 }}
     >
       <div className="col-3">
         <SearchBar />

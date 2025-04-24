@@ -64,7 +64,7 @@ const AliveBookings = () => {
       accessor: "",
       render: (row) => (
         <button
-          className="btn bg-danger shadow"
+          className="btn btn-danger shadow"
           onClick={() => deleteBooking(row.id)}
         >
           <FontAwesomeIcon icon={faTrash} color="white" />

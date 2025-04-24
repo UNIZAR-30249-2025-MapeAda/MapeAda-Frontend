@@ -67,19 +67,3 @@ export interface SpaceScheduleAndBookingsResponseDto {
   restrictions: ScheduleRestrictionResponseDto[];
   bookings: SpaceBookingsResponseDto[];
 }
-
-export interface SpaceFeatureResponseDto {
-  id: string;
-  properties: {
-    id: string;
-    name: string;
-    floor: number;
-    category: string;
-  };
-  geometry: GeoJSON.Geometry;
-}
-
-export interface GeoJsonCollectionResponseDto {
-  type: "FeatureCollection";
-  features: SpaceFeatureResponseDto[];
-}

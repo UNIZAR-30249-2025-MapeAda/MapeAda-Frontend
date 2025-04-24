@@ -1,18 +1,58 @@
 import { useState } from "react";
-import { Button, Spinner } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import BookModal from "../../../features/bookings/components/book-modal";
 import { Map } from "../../../components/ui/map";
 import { Navbar } from "../../../components/ui/navbar";
 import { useGetSpacesByFloor } from "../../../features/bookings/hooks/use-get-spaces-by-floor";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
+import { FloorSelector } from "../../../components/ui/floor-selector";
+import SpaceDetailsModal from "../../../features/spaces/components/space-details-modal";
+import { Space } from "../../../features/spaces/types/models";
+import type { Feature } from "geojson";
+import { BookingList } from "../../../features/bookings/components/booking-list";
 
 function Landing() {
   const [floor, setFloor] = useState(1);
   const [showBookModal, setShowBookModal] = useState(false);
+  const [showBookingList, setShowBookingList] = useState(false);
+  const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
+  const [showSpaceDetailsModal, setShowSpaceDetailsModal] = useState(false);
   const { data: spaces, isLoading, error } = useGetSpacesByFloor(floor);
+  const [selectedSpaces, setSelectedSpaces] = useState([]);
 
-  const [selectedSpaces, setSelectedSpaces] = useState(["L0.01", "A.01"]);
+  const removeSpaceFromBookingList = (index: number) => {
+    setSelectedSpaces((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      if (updated.length === 0) {
+        setShowBookingList(false);
+      }
+      return updated;
+    });
+  };
+
+  const addSpaceToBookingList = (space: Space) => {
+    setSelectedSpaces((prev) => {
+      if (prev.includes(space.name)) return prev;
+      return [...prev, space.name];
+    });
+    setShowBookingList(true);
+    setShowSpaceDetailsModal(false);
+  };
+
+  const handleFeatureClick = (feature: Feature) => {
+    const props = feature.properties;
+    setCurrentSpace({
+      // TODO: cambiar según como metan los datos en la BD
+      // TODO: añadir si es reservable o no y desactivar el boton de reservar si no lo es
+      id: props!.id,
+      name: props!.nombre,
+      category: props!.uso,
+      floor: props!.altura,
+      capacity: props!.capacity,
+      startTime: props!.startTime,
+      endTime: props!.endTime,
+    });
+    setShowSpaceDetailsModal(true);
+  };
 
   if (isLoading) {
     return (
@@ -32,42 +72,20 @@ function Landing() {
 
   return (
     <>
-      <Navbar showBookModal={showBookModal} />
-      <div
-        className="position-absolute bottom-0 end-0 d-flex flex-column bg-white shadow m-3 p-2 align-items-center justify-content-center rounded"
-        style={showBookModal ? undefined : { zIndex: 10000 }}
-      >
-        <button
-          className="btn bg-transparent border-0"
-          onClick={() => setFloor((prev) => Math.min(4, prev + 1))}
-          disabled={floor >= 4}
-        >
-          <FontAwesomeIcon icon={faCaretUp} size="xl" />
-        </button>
-        <strong className="fs-5">{floor}</strong>
-        <button
-          className="btn bg-transparent border-0"
-          onClick={() => setFloor((prev) => Math.max(0, prev - 1))}
-          disabled={floor <= 0}
-        >
-          <FontAwesomeIcon icon={faCaretDown} size="xl" />
-        </button>
-      </div>
-      <div
-        className="position-absolute bottom-50 end-50 p-5"
-        style={showBookModal ? undefined : { zIndex: 10000 }}
-      >
-        <Button
-          variant="dark"
-          className="rounded-pill p-3 shadow"
-          onClick={() => {
-            setShowBookModal(true);
-          }}
-        >
-          RESERVAR
-        </Button>
-      </div>
-      <Map spaces={spaces} />
+      <Navbar />
+      <FloorSelector floor={floor} setFloor={setFloor} />
+      <BookingList
+        spaces={selectedSpaces}
+        show={showBookingList}
+        onRemove={removeSpaceFromBookingList}
+        onBook={() => setShowBookModal(true)}
+      />
+      <Map
+        spaces={spaces}
+        floor={floor}
+        selectedSpaces={selectedSpaces}
+        onFeatureClick={handleFeatureClick}
+      />
       <BookModal
         spaces={selectedSpaces}
         show={showBookModal}
@@ -75,6 +93,16 @@ function Landing() {
           setShowBookModal(false);
         }}
       />
+      {currentSpace && (
+        <SpaceDetailsModal
+          space={currentSpace}
+          show={showSpaceDetailsModal}
+          handleClose={() => setShowSpaceDetailsModal(false)}
+          handleBookSpace={() => {
+            addSpaceToBookingList(currentSpace);
+          }}
+        />
+      )}
     </>
   );
 }

@@ -147,7 +147,7 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !schedule) {
     return (
       <Modal show={show} onHide={handleClose} centered backdrop="static">
         <Modal.Body className="text-center p-5">

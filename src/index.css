@@ -1,0 +1,11 @@
+.modal-backdrop {
+  z-index: 10000;
+}
+
+.modal {
+  z-index: 10001;
+}
+
+.swal2-container {
+  z-index: 10002;
+}

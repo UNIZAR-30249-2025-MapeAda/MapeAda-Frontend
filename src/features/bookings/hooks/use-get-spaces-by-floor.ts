@@ -6,8 +6,7 @@ export const useGetSpacesByFloor = (floor: number) => {
   return useQuery<FeatureCollection, Error>({
     queryKey: ["spaces", floor],
     queryFn: () => getSpacesByFloor(floor),
-    enabled: floor >= 0,
+    enabled: floor >= 0 && floor <= 4,
     staleTime: 1000 * 60 * 5,
-    placeholderData: { type: "FeatureCollection", features: [] },
   });
 };
