@@ -38,8 +38,8 @@ const DurationStep: React.FC<DurationStepProps> = ({
       endMin = Math.min(...ends);
     } else {
       // horario por defecto del edificio
-      startMin = parseMinutes(building.defaultCalendar.schedule.startTime);
-      endMin = parseMinutes(building.defaultCalendar.schedule.endTime);
+      startMin = parseMinutes(building.calendar.default.schedule.startTime);
+      endMin = parseMinutes(building.calendar.default.schedule.endTime);
     }
 
     const generated: string[] = [];

@@ -2,9 +2,9 @@ import React from "react";
 import { Modal } from "react-bootstrap";
 import { Space } from "../types/models";
 import { spaceCategories } from "../types/enums";
-import { useGetBuildingScheduleByDate } from "../../building/api/get-building-schedule-by-date";
 import { ErrorMessage } from "../../../components/errors/error-message";
 import { LoadingIndicator } from "../../../components/ui/loading-indicator";
+import { useGetBuilding } from "../../building/api/get-buiding";
 
 export interface SpaceDetailsModalProps {
   space: Space;
@@ -21,13 +21,36 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
 }) => {
   const shouldFetchSchedule = space.startTime === null;
   const {
-    data: schedule,
+    data: building,
     isLoading,
     error,
-  } = useGetBuildingScheduleByDate({
+  } = useGetBuilding({
     queryKey: ["shouldFetchSchedule"],
     enabled: shouldFetchSchedule,
   });
+
+  const getScheduleForToday = (space: Space): string => {
+    if (space.startTime) {
+      return `${space.startTime} - ${space.endTime}`;
+    }
+
+    const today = new Date();
+    const dayOfWeek = (today.getDay() + 6) % 7; // Convierte 0=Sunday...6=Saturday a 0=Monday...6=Sunday
+
+    const isHoliday =
+      !building?.calendar.default.week[dayOfWeek] ||
+      building?.calendar.restrictions.some(
+        (r) =>
+          new Date(r.date).toDateString() === today.toDateString() &&
+          r.isHoliday
+      );
+
+    if (isHoliday) {
+      return "Día festivo";
+    }
+
+    return `${building?.calendar.default.schedule.startTime} - ${building?.calendar.default.schedule.endTime}`;
+  };
 
   if (isLoading) {
     return (
@@ -86,13 +109,7 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
             </div>
             <div>
               <strong>Horario: </strong>
-              <span>
-                {space.startTime
-                  ? `${space.startTime} - ${space.endTime}`
-                  : schedule?.isHoliday
-                  ? "Día festivo"
-                  : `${schedule?.schedule.startTime} - ${schedule?.schedule.endTime}`}
-              </span>
+              <span>{getScheduleForToday(space)}</span>
             </div>
           </div>
           <div className="col-2"></div>

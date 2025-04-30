@@ -60,7 +60,7 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
   
   const maxAsistentes = useMemo(() => {
     if (!building) return 0;
-    return Math.floor((capacidadTotal * building.maxUse) / 100);
+    return Math.floor((capacidadTotal * building.maxUse.value) / 100);
   }, [capacidadTotal, building]);  
   
 

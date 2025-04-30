@@ -3,28 +3,32 @@ import { Building } from "../types/models";
 import { GetBuildingResponse } from "../../../types/api";
 
 const mockSchedule: Building = {
-  maxUse: 90,
-  defaultCalendar: {
-    week: [true, true, true, true, true, false, false],
-    schedule: {
-      startTime: "8:00",
-      endTime: "22:00",
-    },
+  maxUse: {
+    value: 90,
   },
-  calendarRestrictions: [
-    {
-      date: new Date(),
-      isHoliday: false,
+  calendar: {
+    default: {
+      week: [true, true, true, true, true, false, false],
       schedule: {
         startTime: "8:00",
-        endTime: "18:00",
+        endTime: "22:00",
       },
     },
-    {
-      date: new Date(2025, 4, 12),
-      isHoliday: true,
-    },
-  ],
+    restrictions: [
+      {
+        date: new Date(),
+        isHoliday: false,
+        schedule: {
+          startTime: "8:00",
+          endTime: "18:00",
+        },
+      },
+      {
+        date: new Date(2025, 4, 12),
+        isHoliday: true,
+      },
+    ],
+  },
 };
 
 const getBuilding = async (): Promise<Building> => {
@@ -36,9 +40,7 @@ const getBuilding = async (): Promise<Building> => {
   return calendar;
 };
 
-export const useGetBuilding = (
-  options?: UseQueryOptions<Building, Error>
-) => {
+export const useGetBuilding = (options?: UseQueryOptions<Building, Error>) => {
   return useQuery<Building, Error>({
     queryKey: ["building"],
     queryFn: getBuilding,

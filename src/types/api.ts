@@ -57,12 +57,7 @@ export type PatchBookingRequest = {
   valid: boolean;
 };
 
-export interface GetBuildingScheduleByDateResponse {
-  isHoliday: boolean;
-  schedule: Intervalo;
-}
-
-interface Horario {
+interface Schedule {
   date: Date;
   isHoliday: boolean;
   schedule?: Intervalo;
@@ -73,8 +68,16 @@ interface DefaultCalendar {
   schedule: Intervalo;
 }
 
+interface Porcentaje {
+  value: number;
+}
+
+interface Calendar {
+  default: DefaultCalendar;
+  restrictions: Schedule[];
+}
+
 export interface GetBuildingResponse {
-  maxUse: number;
-  defaultCalendar: DefaultCalendar;
-  calendarRestrictions: Horario[];
+  maxUse: Porcentaje;
+  calendar: Calendar;
 }

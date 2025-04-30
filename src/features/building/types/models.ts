@@ -3,12 +3,7 @@ interface Intervalo {
   endTime: string;
 }
 
-export interface BuildingSchedule {
-  isHoliday: boolean;
-  schedule: Intervalo;
-}
-
-interface Horario {
+interface Schedule {
   date: Date;
   isHoliday: boolean;
   schedule?: Intervalo;
@@ -19,8 +14,16 @@ interface DefaultCalendar {
   schedule: Intervalo;
 }
 
+interface Porcentaje {
+  value: number;
+}
+
+interface Calendar {
+  default: DefaultCalendar;
+  restrictions: Schedule[];
+}
+
 export interface Building {
-  maxUse: number;
-  defaultCalendar: DefaultCalendar;
-  calendarRestrictions: Horario[];
+  maxUse: Porcentaje;
+  calendar: Calendar;
 }

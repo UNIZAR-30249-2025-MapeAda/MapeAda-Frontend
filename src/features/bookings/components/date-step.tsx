@@ -20,11 +20,11 @@ const DateStep: React.FC<DateStepProps> = ({
     const jsDay = date.getDay(); // 0=Sunday ... 6=Saturday
     const isoWeekDay = jsDay === 0 ? 6 : jsDay - 1; // 0=Monday ... 6=Sunday
 
-    if (!building.defaultCalendar.week[isoWeekDay]) {
+    if (!building.calendar.default.week[isoWeekDay]) {
       return false;
     }
 
-    const restriction = building.calendarRestrictions.find(
+    const restriction = building.calendar.restrictions.find(
       (r) => format(new Date(r.date), "yyyy-MM-dd") === iso
     );
     if (restriction?.isHoliday) {
