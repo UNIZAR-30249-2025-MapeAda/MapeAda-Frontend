@@ -1,34 +1,35 @@
 import { es } from "date-fns/locale";
 import React from "react";
 import DatePicker from "react-datepicker";
-import {
-  DailyScheduleResponseDto,
-  ScheduleRestrictionResponseDto,
-} from "../../../types/api";
-import { format } from "date-fns";
+import { addYears, format } from "date-fns";
+import { Building } from "../../building/types/models";
 
 interface DateStepProps {
   fecha: string;
   setFecha: (value: string) => void;
-  defaultSchedule: DailyScheduleResponseDto[];
-  restrictions: ScheduleRestrictionResponseDto[];
+  building: Building;
 }
 
 const DateStep: React.FC<DateStepProps> = ({
   fecha,
   setFecha,
-  defaultSchedule,
-  restrictions,
+  building,
 }) => {
   const filterDate = (date: Date) => {
     const iso = format(date, "yyyy-MM-dd");
-    const dow = date.getDay(); // 0=sunday … 6=saturday
+    const jsDay = date.getDay(); // 0=Sunday ... 6=Saturday
+    const isoWeekDay = jsDay === 0 ? 6 : jsDay - 1; // 0=Monday ... 6=Sunday
 
-    const rest = restrictions.find((r) => r.date === iso);
-    if (rest?.isHoliday) return false;
+    if (!building.defaultCalendar.week[isoWeekDay]) {
+      return false;
+    }
 
-    const hasDefault = defaultSchedule.some((ds) => ds.dayOfWeek === dow);
-    if (!hasDefault) return false;
+    const restriction = building.calendarRestrictions.find(
+      (r) => format(new Date(r.date), "yyyy-MM-dd") === iso
+    );
+    if (restriction?.isHoliday) {
+      return false;
+    }
 
     return true;
   };
@@ -47,6 +48,7 @@ const DateStep: React.FC<DateStepProps> = ({
       onChange={handleDateChange}
       inline
       minDate={new Date()}
+      maxDate={addYears(new Date(), 1)}
       filterDate={filterDate}
     />
   );

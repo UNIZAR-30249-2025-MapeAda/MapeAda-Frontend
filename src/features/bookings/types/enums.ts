@@ -1,6 +1,3 @@
-export const bookingStatuses = ["Válida", "Potencialmente inválida"] as const;
-export type BookingStatus = (typeof bookingStatuses)[number];
-
 export const bookingUsages = [
   "Docencia",
   "Investigación",
@@ -8,3 +5,6 @@ export const bookingUsages = [
   "Otros",
 ] as const;
 export type BookingUsage = (typeof bookingUsages)[number];
+
+export const bookingStatuses = ["Potencialmente inválida", "Válida"] as const;
+export type BookingStatus = (typeof bookingStatuses)[number];

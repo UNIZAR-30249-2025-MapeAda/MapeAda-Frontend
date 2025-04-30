@@ -1,10 +1,10 @@
 import { configureAuth } from "react-query-auth";
 import { api } from "./api-client";
-import { LoginResponseDto, MeResponseDto } from "../types/api";
+import { LoginResponse, MeResponse } from "../types/api";
 import { z } from "zod";
 import { ADMIN_ROLE } from "../config/constants";
 
-const getUser = async (): Promise<MeResponseDto> => {
+const getUser = async (): Promise<MeResponse> => {
   /*
   const { data } = await api.get<MeResponseDto>("/auth/me");
   return data;
@@ -25,7 +25,7 @@ export const loginInputSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginInputSchema>;
 
-const login = async (data: LoginInput): Promise<LoginResponseDto> => {
+const login = async (data: LoginInput): Promise<LoginResponse> => {
   /*
   const { data: loginResponse } = await api.post<LoginResponseDto>(
     "/auth/login",

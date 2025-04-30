@@ -1,9 +1,6 @@
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import type { Feature, FeatureCollection } from "geojson";
-import { PathOptions } from "leaflet";
-import { SpaceCategory } from "../../features/spaces/types/enums";
-
-const CAMPUS_COORDS: [number, number] = [41.6834, -0.8885];
+import { CAMPUS_COORDS, CATEGORY_COLORS } from "../../config/constants";
 
 interface MapProps {
   spaces: FeatureCollection;
@@ -12,47 +9,33 @@ interface MapProps {
   onFeatureClick?: (feature: Feature) => void;
 }
 
-const categoryColors: Record<SpaceCategory, string> = {
-  Laboratorio:    "#FF6666",
-  Despacho:       "#FFB266",
-  Aula:           "#66CCFF",
-  Seminario:      "#CC66FF",
-  "Sala común":   "#66FF66",
-  "Salón de actos":"#FF66CC",
-  "Sala de reunión":"#66FFFF",
-  "Sala informática":"#FFFF66",
-};
-
 export const Map: React.FC<MapProps> = ({
   spaces,
   floor,
   selectedSpaces = [],
   onFeatureClick,
 }) => {
-  const styleFeature = (feature: Feature): PathOptions => {
-    const props = feature.properties as any;
-    const uso = props.uso as SpaceCategory | undefined;
-    const name = props.nombre as string | undefined;
-
-    const fillColor = uso && categoryColors[uso]
-      ? categoryColors[uso]
-      : "#CCCCCC";
-
-    const isSelected = name ? selectedSpaces.includes(name) : false;
-
+  function getStyle(feature?: Feature): L.PathOptions {
+    const props = feature!.properties;
+    const catIndex: number = props!.categoria;
+    const isReservable: boolean = props!.reservable;
+    const isSelected: boolean = selectedSpaces.includes(String(feature!.id));
+    const fillColor = CATEGORY_COLORS[catIndex] ?? '#cccccc';
+  
     return {
       fillColor,
-      fillOpacity: isSelected ? 0.75 : 0.4,
-      color: isSelected ? "#000000" : "#444444",
+      fillOpacity: isReservable ? (isSelected ? 1 : 0.5) : 0.2,
+      color: fillColor,
       weight: isSelected ? 3 : 1,
+      dashArray: isReservable ? undefined : "4",
     };
-  };
+  }
 
   return (
     <MapContainer
       center={CAMPUS_COORDS}
       zoom={19}
-      dragging={false} // desactiva el arrastre
+      dragging={false} // arrastre
       scrollWheelZoom={false} // rueda del ratón
       doubleClickZoom={false} // doble clic
       touchZoom={false} // gestos táctiles
@@ -68,7 +51,7 @@ export const Map: React.FC<MapProps> = ({
       <GeoJSON
         key={floor}
         data={spaces}
-        style={styleFeature}
+        style={getStyle}
         onEachFeature={(feature, layer) => {
           layer.on("click", () => {
             if (onFeatureClick) {

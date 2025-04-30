@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "react-bootstrap";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface BookingListProps {
@@ -33,7 +33,7 @@ export const BookingList: React.FC<BookingListProps> = ({
             className="btn bg-transparent"
             onClick={() => onRemove(idx)}
           >
-            <FontAwesomeIcon icon={faXmark} color="black" />
+            <FontAwesomeIcon icon={faTrash} color="red" />
           </button>
         </div>
       ))}

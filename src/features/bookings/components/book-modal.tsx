@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Modal, Spinner } from "react-bootstrap";
+import React, { useMemo, useState } from "react";
+import { Modal } from "react-bootstrap";
 import { Stepper } from "react-form-stepper";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,10 +8,17 @@ import DateStep from "./date-step";
 import DurationStep from "./duration-step";
 import BookInfoStep from "./book-info-step";
 import SummaryStep from "./summary-step";
-import { useGetSpaceScheduleAndBookings } from "../hooks/use-get-space-schedule-and-bookings";
+import { LoadingIndicator } from "../../../components/ui/loading-indicator";
+import { ErrorMessage } from "../../../components/errors/error-message";
+import { getBookingsBySpaceQuery } from "../api/get-bookings-by-space";
+import { useQueries } from "@tanstack/react-query";
+import { Booking } from "../types/models";
+import { useGetBuilding } from "../../building/api/get-buiding";
+import { Space } from "../../spaces/types/models";
+import { isSameDay } from "date-fns";
 
 interface BookModalProps {
-  spaces: string[];
+  spaces: Space[];
   show: boolean;
   handleClose: () => void;
 }
@@ -24,12 +31,38 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
   const [uso, setUso] = useState<string>("");
   const [asistentes, setAsistentes] = useState(0);
   const [detallesAdicionales, setDetallesAdicionales] = useState<string>("");
+  const spacesNames = useMemo(() => spaces.map((s) => s.name), [spaces]);
 
   const {
-    data: schedule,
-    isLoading,
-    error,
-  } = useGetSpaceScheduleAndBookings(spaces);
+    data: building,
+    isLoading: loadingBuilding,
+    error: errorBuilding,
+  } = useGetBuilding();
+
+  const bookingQueries = useQueries({
+    queries: spaces.map((s) => getBookingsBySpaceQuery(s.id)),
+  });
+
+  const loadingBookings = bookingQueries.some((q) => q.isLoading);
+  const errorBookings = bookingQueries.find((q) => q.error)?.error;
+
+  const bookings: Booking[] = bookingQueries
+    .filter((q) => q.data)
+    .map((q) => q.data as Booking[])
+    .flat();
+
+  const isLoading = loadingBuilding || loadingBookings;
+  const error = errorBuilding || errorBookings;
+
+  const capacidadTotal = useMemo(() => {
+    return spaces.reduce((total, s) => total + s.capacity, 0);
+  }, [spaces]);
+  
+  const maxAsistentes = useMemo(() => {
+    if (!building) return 0;
+    return Math.floor((capacidadTotal * building.maxUse) / 100);
+  }, [capacidadTotal, building]);  
+  
 
   const isStepValid = () => {
     switch (currentStep) {
@@ -101,12 +134,7 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
     switch (currentStep) {
       case 0:
         return (
-          <DateStep
-            fecha={fecha}
-            setFecha={setFecha}
-            defaultSchedule={schedule!.defaultSchedule}
-            restrictions={schedule!.restrictions}
-          />
+          <DateStep fecha={fecha} setFecha={setFecha} building={building!} />
         );
       case 1:
         return (
@@ -114,9 +142,9 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
             fecha={fecha}
             duracion={duracion}
             setDuracion={setDuracion}
-            bookings={schedule!.bookings.filter((b) => b.date === fecha)}
-            defaultSchedule={schedule!.defaultSchedule}
-            restrictions={schedule!.restrictions}
+            spaces={spaces}
+            bookings={bookings.filter((b) => fecha && isSameDay(b.date, fecha))}
+            building={building!}
           />
         );
       case 2:
@@ -128,12 +156,13 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
             setUso={setUso}
             setAsistentes={setAsistentes}
             setDetallesAdicionales={setDetallesAdicionales}
+            maxAsistentes={maxAsistentes}
           />
         );
       case 3:
         return (
           <SummaryStep
-            espacios={spaces}
+            espacios={spacesNames}
             fecha={fecha}
             duracion={duracion}
             uso={uso}
@@ -147,11 +176,11 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
     }
   };
 
-  if (isLoading || !schedule) {
+  if (isLoading) {
     return (
       <Modal show={show} onHide={handleClose} centered backdrop="static">
         <Modal.Body className="text-center p-5">
-          <Spinner animation="border" /> Cargando horarios…
+          <LoadingIndicator message="Cargando reservas..." />
         </Modal.Body>
       </Modal>
     );
@@ -161,7 +190,7 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
     return (
       <Modal show={show} onHide={handleClose} centered backdrop="static">
         <Modal.Body className="text-center text-danger p-5">
-          Error al cargar los horarios.
+          <ErrorMessage message="Error al cargar los horarios." />
         </Modal.Body>
       </Modal>
     );

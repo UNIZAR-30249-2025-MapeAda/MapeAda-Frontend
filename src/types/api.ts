@@ -1,69 +1,80 @@
 import { Role } from "../config/constants";
 
-export type LoginResponseDto = {
+export type LoginResponse = {
   user: { nip: string; username: string; email: string; role: Role };
   token: string;
 };
 
-export type MeResponseDto = {
+export type MeResponse = {
   nip: string;
   username: string;
   email: string;
   role: Role;
 };
 
-export type AliveBookingResponseDto = {
-  id: number;
-  userNip: string;
-  spaces: string[];
-  date: string;
-  startTime: string;
-  endTime: string;
-  assistants: number;
-  usage: number;
-  details?: string;
-  status: number;
-};
-
-export type UserBookingResponseDto = {
-  id: number;
-  userNip: string;
-  spaces: string[];
-  date: string;
-  startTime: string;
-  endTime: string;
-  assistants: number;
-  usage: number;
-  details?: string;
-  status: number;
-};
-
-export type ValidateBookingDto = {
-  id: number;
-  status: number;
-};
-
-export interface DailyScheduleResponseDto {
-  dayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday, 1 = Monday, … 6 = Saturday
+interface Intervalo {
   startTime: string;
   endTime: string;
 }
 
-export interface ScheduleRestrictionResponseDto {
-  date: string;
-  startTime: string;
-  endTime: string;
+export type GetAllBookingsResponse = {
+  id: number;
+  userNip: string;
+  spaces: string[];
+  date: Date;
+  schedule: Intervalo;
+  assistants: number;
+  usage: number;
+  details?: string;
+  valid: boolean;
+};
+
+export type GetBookingsByUserResponse = {
+  id: number;
+  userNip: string;
+  spaces: string[];
+  date: Date;
+  schedule: Intervalo;
+  assistants: number;
+  usage: number;
+  details?: string;
+  valid: boolean;
+};
+
+export type GetBookingsBySpaceResponse = {
+  id: number;
+  userNip: string;
+  spaces: string[];
+  date: Date;
+  schedule: Intervalo;
+  assistants: number;
+  usage: number;
+  details?: string;
+  valid: boolean;
+};
+
+export type PatchBookingRequest = {
+  valid: boolean;
+};
+
+export interface GetBuildingScheduleByDateResponse {
   isHoliday: boolean;
+  schedule: Intervalo;
 }
 
-export interface SpaceBookingsResponseDto {
-  date: string;
-  startTime: string;
-  endTime: string;
+interface Horario {
+  date: Date;
+  isHoliday: boolean;
+  schedule?: Intervalo;
 }
 
-export interface SpaceScheduleAndBookingsResponseDto {
-  defaultSchedule: DailyScheduleResponseDto[];
-  restrictions: ScheduleRestrictionResponseDto[];
-  bookings: SpaceBookingsResponseDto[];
+interface DefaultCalendar {
+  week: boolean[]; // 0=Monday ... 6=Sunday
+  schedule: Intervalo;
+}
+
+export interface GetBuildingResponse {
+  maxUse: number;
+  defaultCalendar: DefaultCalendar;
+  calendarRestrictions: Horario[];
 }

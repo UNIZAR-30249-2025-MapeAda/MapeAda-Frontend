@@ -1,22 +1,34 @@
 import {
-  AliveBookingResponseDto,
-  UserBookingResponseDto,
+  GetAllBookingsResponse,
+  GetBookingsBySpaceResponse,
+  GetBookingsByUserResponse,
 } from "../../../types/api";
-import { bookingUsages, bookingStatuses } from "../types/enums";
-import { AliveBooking, UserBooking } from "../types/models";
+import { bookingUsages } from "../types/enums";
+import { Booking } from "../types/models";
 
-export const mapAliveBookingResponseDtoToAliveBooking = (
-  dto: AliveBookingResponseDto
-): AliveBooking => ({
+export const mapGetAllBookingsResponseToBooking = (
+  dto: GetAllBookingsResponse
+): Booking => ({
   ...dto,
+  startTime: dto.schedule.startTime,
+  endTime: dto.schedule.endTime,
   usage: bookingUsages[dto.usage],
-  status: bookingStatuses[dto.status],
 });
 
-export const mapUserBookingResponseDtoToUserBooking = (
-  dto: UserBookingResponseDto
-): UserBooking => ({
+export const mapGetBookingsByUserResponseToBooking = (
+  dto: GetBookingsByUserResponse
+): Booking => ({
   ...dto,
+  startTime: dto.schedule.startTime,
+  endTime: dto.schedule.endTime,
   usage: bookingUsages[dto.usage],
-  status: bookingStatuses[dto.status],
+});
+
+export const mapGetBookingsBySpaceResponseToBooking = (
+  dto: GetBookingsBySpaceResponse
+): Booking => ({
+  ...dto,
+  startTime: dto.schedule.startTime,
+  endTime: dto.schedule.endTime,
+  usage: bookingUsages[dto.usage],
 });

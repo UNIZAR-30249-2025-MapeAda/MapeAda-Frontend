@@ -9,6 +9,7 @@ interface BookInfoStepProps {
   setUso: (value: string) => void;
   setAsistentes: (value: number) => void;
   setDetallesAdicionales: (value: string) => void;
+  maxAsistentes: number;
 }
 
 const BookInfoStep: React.FC<BookInfoStepProps> = ({
@@ -18,7 +19,30 @@ const BookInfoStep: React.FC<BookInfoStepProps> = ({
   setUso,
   setAsistentes,
   setDetallesAdicionales,
+  maxAsistentes,
 }) => {
+  const handleAssistantsInput = (
+    raw: string,
+    max: number,
+    setValue: (value: number) => void
+  ) => {
+    if (raw === "") {
+      setValue(0);
+      return;
+    }
+
+    const num = Number(raw);
+    if (isNaN(num)) return;
+
+    if (num > max) {
+      setValue(max);
+    } else if (num < 1) {
+      setValue(1);
+    } else {
+      setValue(num);
+    }
+  };
+
   return (
     <div className="d-flex">
       <div className="col-4"></div>
@@ -33,14 +57,16 @@ const BookInfoStep: React.FC<BookInfoStepProps> = ({
           initialValue={uso}
           onChange={(newValue) => setUso(newValue)}
         />
-        <span>Número de asistentes</span>
+        <span>Número de asistentes (máximo {maxAsistentes})</span>
         <input
           type="number"
           className="form-control"
-          placeholder="0"
+          placeholder="1"
           value={asistentes ? asistentes : ""}
+          min={1}
+          max={maxAsistentes}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setAsistentes(Number(e.target.value))
+            handleAssistantsInput(e.target.value, maxAsistentes, setAsistentes)
           }
         />
         <span>Detalles adicionales (opcional)</span>

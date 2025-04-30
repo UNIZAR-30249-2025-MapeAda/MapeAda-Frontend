@@ -8,8 +8,8 @@ import {
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { paths } from "../config/paths";
 import Landing from "./routes/app/landing";
-import AliveBookings from "./routes/app/alive-bookings";
-import UserBookings from "./routes/app/user-bookings";
+import AllBookings from "./routes/app/all-bookings";
+import BookingsByUser from "./routes/app/bookings-by-user";
 import { ProtectedRoute } from "../components/protected-route";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,21 +56,21 @@ const createAppRouter = (queryClient: QueryClient) =>
             <ProtectedRoute
               allowedRoles={paths.app.bookings.alive.allowedRoles}
             >
-              <AliveBookings />
+              <AllBookings />
             </ProtectedRoute>
           ),
           lazy: () =>
-            import("./routes/app/alive-bookings").then(convert(queryClient)),
+            import("./routes/app/all-bookings").then(convert(queryClient)),
         },
         {
           path: paths.app.bookings.user.path,
           element: (
             <ProtectedRoute allowedRoles={paths.app.bookings.user.allowedRoles}>
-              <UserBookings />
+              <BookingsByUser />
             </ProtectedRoute>
           ),
           lazy: () =>
-            import("./routes/app/user-bookings").then(convert(queryClient)),
+            import("./routes/app/bookings-by-user").then(convert(queryClient)),
         },
       ],
     },

@@ -1,6 +1,10 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
 import { Space } from "../types/models";
+import { spaceCategories } from "../types/enums";
+import { useGetBuildingScheduleByDate } from "../../building/api/get-building-schedule-by-date";
+import { ErrorMessage } from "../../../components/errors/error-message";
+import { LoadingIndicator } from "../../../components/ui/loading-indicator";
 
 export interface SpaceDetailsModalProps {
   space: Space;
@@ -15,6 +19,28 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
   handleClose,
   handleBookSpace,
 }) => {
+  const shouldFetchSchedule = space.startTime === null;
+  const {
+    data: schedule,
+    isLoading,
+    error,
+  } = useGetBuildingScheduleByDate({
+    queryKey: ["shouldFetchSchedule"],
+    enabled: shouldFetchSchedule,
+  });
+
+  if (isLoading) {
+    return (
+      <LoadingIndicator message="Obteniendo el horario del Ada Byron..." />
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage message="Error al obtener el horario del Ada Byron." />
+    );
+  }
+
   return (
     <Modal
       show={show}
@@ -31,8 +57,20 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
           <div className="col-3"></div>
           <div className="d-flex flex-column text-start p-4 gap-3 col">
             <div>
+              <strong>ID: </strong>
+              <span>{space.id}</span>
+            </div>
+            <div>
+              <strong>Reservable: </strong>
+              <span>{space.reservable ? "Sí" : "No"}</span>
+            </div>
+            <div>
+              <strong>Tipo: </strong>
+              <span>{spaceCategories[Number(space.type)]}</span>
+            </div>
+            <div>
               <strong>Categoría: </strong>
-              <span>{space.category}</span>
+              <span>{spaceCategories[Number(space.category)]}</span>
             </div>
             <div>
               <strong>Planta: </strong>
@@ -43,13 +81,21 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
               <span>{space.capacity}</span>
             </div>
             <div>
-              <strong>Horarios: </strong>
+              <strong>Propietario: </strong>
+              <span>{space.ownerId}</span>
+            </div>
+            <div>
+              <strong>Horario: </strong>
               <span>
-                {space.startTime} - {space.endTime}
+                {space.startTime
+                  ? `${space.startTime} - ${space.endTime}`
+                  : schedule?.isHoliday
+                  ? "Día festivo"
+                  : `${schedule?.schedule.startTime} - ${schedule?.schedule.endTime}`}
               </span>
             </div>
           </div>
-          <div className="col-3"></div>
+          <div className="col-2"></div>
         </div>
       </Modal.Body>
       <Modal.Footer className="justify-content-center gap-3">
@@ -57,6 +103,7 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
           className="btn btn-dark px-3"
           type="button"
           onClick={handleBookSpace}
+          disabled={!space.reservable}
         >
           Añadir a la reserva
         </button>

@@ -1,23 +1,26 @@
-import { useState } from "react";
-import { Spinner } from "react-bootstrap";
+import { useMemo, useState } from "react";
 import BookModal from "../../../features/bookings/components/book-modal";
 import { Map } from "../../../components/ui/map";
 import { Navbar } from "../../../components/ui/navbar";
-import { useGetSpacesByFloor } from "../../../features/bookings/hooks/use-get-spaces-by-floor";
 import { FloorSelector } from "../../../components/ui/floor-selector";
 import SpaceDetailsModal from "../../../features/spaces/components/space-details-modal";
 import { Space } from "../../../features/spaces/types/models";
 import type { Feature } from "geojson";
 import { BookingList } from "../../../features/bookings/components/booking-list";
+import { LoadingIndicator } from "../../../components/ui/loading-indicator";
+import { ErrorMessage } from "../../../components/errors/error-message";
+import { useGetSpacesByFloor } from "../../../features/spaces/api/get-spaces-by-floor";
+import SpaceLegend from "../../../features/spaces/components/space-leyend";
 
 function Landing() {
-  const [floor, setFloor] = useState(1);
+  const [floor, setFloor] = useState(0);
   const [showBookModal, setShowBookModal] = useState(false);
   const [showBookingList, setShowBookingList] = useState(false);
   const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
   const [showSpaceDetailsModal, setShowSpaceDetailsModal] = useState(false);
   const { data: spaces, isLoading, error } = useGetSpacesByFloor(floor);
-  const [selectedSpaces, setSelectedSpaces] = useState([]);
+  const [selectedSpaces, setSelectedSpaces] = useState<Space[]>([]);
+  const selectedSpaceNames = useMemo(() => selectedSpaces.map((s) => s.name), [selectedSpaces]);
 
   const removeSpaceFromBookingList = (index: number) => {
     setSelectedSpaces((prev) => {
@@ -31,8 +34,8 @@ function Landing() {
 
   const addSpaceToBookingList = (space: Space) => {
     setSelectedSpaces((prev) => {
-      if (prev.includes(space.name)) return prev;
-      return [...prev, space.name];
+      if (prev.some((s) => s.id === space.id)) return prev;
+      return [...prev, space];
     });
     setShowBookingList(true);
     setShowSpaceDetailsModal(false);
@@ -40,33 +43,33 @@ function Landing() {
 
   const handleFeatureClick = (feature: Feature) => {
     const props = feature.properties;
-    setCurrentSpace({
-      // TODO: cambiar según como metan los datos en la BD
-      // TODO: añadir si es reservable o no y desactivar el boton de reservar si no lo es
-      id: props!.id,
+    const space: Space = {
+      id: String(feature.id),
       name: props!.nombre,
-      category: props!.uso,
-      floor: props!.altura,
-      capacity: props!.capacity,
-      startTime: props!.startTime,
-      endTime: props!.endTime,
-    });
+      dimension: props!.tamanyo,
+      type: props!.tipo,
+      category: props!.categoria,
+      floor: props!.planta,
+      capacity: props!.capacidad,
+      reservable: props!.reservable,
+      startTime: props!.hora_inicio,
+      endTime: props!.hora_fin,
+      ownerType: props!.tipo_propietario,
+      ownerId: props!.propietario_id,
+    };
+    setCurrentSpace(space);
     setShowSpaceDetailsModal(true);
   };
 
   if (isLoading) {
-    return (
-      <div className="p-5 text-center">
-        <Spinner animation="border" /> Cargando espacios...
-      </div>
-    );
+    return <LoadingIndicator message="Cargando espacios..." />;
   }
 
   if (error) {
     return (
-      <div className="p-5 text-danger">
-        Error al cargar espacios de la planta {floor}.
-      </div>
+      <ErrorMessage
+        message={`Error al cargar espacios de la planta ${floor}.`}
+      />
     );
   }
 
@@ -74,16 +77,17 @@ function Landing() {
     <>
       <Navbar />
       <FloorSelector floor={floor} setFloor={setFloor} />
+      <SpaceLegend />
       <BookingList
-        spaces={selectedSpaces}
+        spaces={selectedSpaceNames}
         show={showBookingList}
         onRemove={removeSpaceFromBookingList}
         onBook={() => setShowBookModal(true)}
       />
       <Map
-        spaces={spaces}
+        spaces={spaces!}
         floor={floor}
-        selectedSpaces={selectedSpaces}
+        selectedSpaces={selectedSpaces.map((s) => s.id)}
         onFeatureClick={handleFeatureClick}
       />
       <BookModal

@@ -8,16 +8,16 @@ export const paths = {
 
   auth: {
     login: {
-      path: "/auth/login",
+      path: "/login",
       getHref: (redirectTo?: string | null | undefined) =>
-        `/auth/login${
+        `/login${
           redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""
         }`,
     },
     unauthorized: {
-      path: "/auth/unauthorized",
+      path: "/unauthorized",
       getHref: (redirectTo?: string | null | undefined) =>
-        `/auth/unauthorized${
+        `/unauthorized${
           redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""
         }`,
     },
@@ -35,13 +35,13 @@ export const paths = {
     },
     bookings: {
       alive: {
-        path: "reservas",
-        getHref: () => "/app/reservas",
+        path: "bookings",
+        getHref: () => "/app/bookings",
         allowedRoles: [ADMIN_ROLE],
       },
       user: {
-        path: "reservas/:userId",
-        getHref: (userId: string) => `/app/reservas/${userId}`,
+        path: "bookings/user/:userId",
+        getHref: (userId: string) => `/app/bookings/user/${userId}`,
         allowedRoles: ALL_ROLES,
       },
     },

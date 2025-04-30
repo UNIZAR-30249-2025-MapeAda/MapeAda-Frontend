@@ -1,27 +1,14 @@
-import { BookingUsage, BookingStatus } from "./enums";
+import { BookingUsage } from "./enums";
 
-export type AliveBooking = {
+export type Booking = {
   id: number;
   userNip: string;
   spaces: string[];
-  date: string;
+  date: Date;
   startTime: string;
   endTime: string;
   assistants: number;
   usage: BookingUsage;
   details?: string;
-  status: BookingStatus;
-};
-
-export type UserBooking = {
-  id: number;
-  userNip: string;
-  spaces: string[];
-  date: string;
-  startTime: string;
-  endTime: string;
-  assistants: number;
-  usage: BookingUsage;
-  details?: string;
-  status: BookingStatus;
+  valid: boolean;
 };

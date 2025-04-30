@@ -11,11 +11,11 @@ function authRequestInterceptor(config: InternalAxiosRequestConfig) {
 }
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5157",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 export const apiPygeoapi = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: import.meta.env.VITE_PYGEOAPI_URL,
 });
 
 apiPygeoapi.interceptors.response.use((res) => res.data);

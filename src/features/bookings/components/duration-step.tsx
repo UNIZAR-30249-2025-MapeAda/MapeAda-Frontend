@@ -1,81 +1,78 @@
 import React, { useEffect, useState } from "react";
-import {
-  DailyScheduleResponseDto,
-  ScheduleRestrictionResponseDto,
-  SpaceBookingsResponseDto,
-} from "../../../types/api";
 import { parseMinutes, formatMinutes } from "../../../utils/format";
+import { Building } from "../../building/types/models";
+import { Booking } from "../types/models";
+import { ErrorMessage } from "../../../components/errors/error-message";
+import { Space } from "../../spaces/types/models";
 
 interface DurationStepProps {
   fecha: string;
   duracion: string;
   setDuracion: (value: string) => void;
-  defaultSchedule: DailyScheduleResponseDto[];
-  restrictions: ScheduleRestrictionResponseDto[];
-  bookings: SpaceBookingsResponseDto[];
+  spaces: Space[];
+  bookings: Booking[];
+  building: Building;
 }
 
 const DurationStep: React.FC<DurationStepProps> = ({
   fecha,
   duracion,
   setDuracion,
-  defaultSchedule,
-  restrictions,
+  spaces,
   bookings,
+  building,
 }) => {
   const [slots, setSlots] = useState<string[]>([]);
   const [selected, setSelected] = useState<string[]>(
     duracion ? duracion.split(",") : []
   );
 
-  const bookingRanges = bookings.map((b) => ({
-    start: parseMinutes(b.startTime),
-    end: parseMinutes(b.endTime),
-  }));
-
   useEffect(() => {
-    if (!fecha) {
-      setSlots([]);
-      return;
-    }
-    const date = new Date(fecha);
-    const dow = date.getDay();
-    const rest = restrictions.find((r) => r.date === fecha);
-
     let startMin: number, endMin: number;
-    if (rest && !rest.isHoliday && rest.startTime && rest.endTime) {
-      startMin = parseMinutes(rest.startTime);
-      endMin = parseMinutes(rest.endTime);
-    } else {
-      const daily = defaultSchedule.find((ds) => ds.dayOfWeek === dow);
-      startMin = daily ? parseMinutes(daily.startTime) : 0;
-      endMin = daily ? parseMinutes(daily.endTime) : 0;
-    }
+    const rangedSpaces = spaces.filter((s) => s.startTime && s.endTime);
 
-    if (rest?.isHoliday) {
-      setSlots([]);
-      return;
+    if (rangedSpaces.length > 0) {
+      const starts = rangedSpaces.map((s) => parseMinutes(s.startTime!));
+      const ends = rangedSpaces.map((s) => parseMinutes(s.endTime!));
+      startMin = Math.max(...starts);
+      endMin = Math.min(...ends);
+    } else {
+      // horario por defecto del edificio
+      startMin = parseMinutes(building.defaultCalendar.schedule.startTime);
+      endMin = parseMinutes(building.defaultCalendar.schedule.endTime);
     }
 
     const generated: string[] = [];
     for (let t = startMin; t + 60 <= endMin; t += 60) {
       generated.push(formatMinutes(t));
     }
-
     setSlots(generated);
+
+    const bookingRanges = bookings
+      .filter((b) => b.startTime)
+      .map((b) => ({
+        start: parseMinutes(b.startTime),
+        end: parseMinutes(b.endTime),
+      }));
 
     const filtered = selected.filter((h) => {
       const m = parseMinutes(h);
-      if (!generated.includes(h)) return false;
-      return !bookingRanges.some((r) => m >= r.start && m < r.end);
+      return (
+        generated.includes(h) &&
+        !bookingRanges.some((r) => m >= r.start && m < r.end)
+      );
     });
-
     setSelected(filtered);
     setDuracion(filtered.join(","));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fecha, defaultSchedule, restrictions, bookings]);
+  }, [fecha, bookings, spaces, building, setDuracion]);
 
   const toggle = (hour: string) => {
+    const bookingRanges = bookings
+      .filter((b) => b.startTime)
+      .map((b) => ({
+        start: parseMinutes(b.startTime),
+        end: parseMinutes(b.endTime),
+      }));
     const m = parseMinutes(hour);
     if (bookingRanges.some((r) => m >= r.start && m < r.end)) return;
 
@@ -101,12 +98,10 @@ const DurationStep: React.FC<DurationStepProps> = ({
     setDuracion(next.join(","));
   };
 
-  if (!fecha) {
-    return <p className="text-muted">Seleccione una fecha primero.</p>;
-  }
-
   if (slots.length === 0) {
-    return <p className="text-danger">No hay franjas disponibles.</p>;
+    return (
+      <ErrorMessage message="No hay franjas horarias disponibles para los espacios seleccionados." />
+    );
   }
 
   const columns = 3;
@@ -114,6 +109,14 @@ const DurationStep: React.FC<DurationStepProps> = ({
   for (let i = 0; i < slots.length; i += columns) {
     rows.push(slots.slice(i, i + columns));
   }
+
+  const bookingRanges = bookings
+    .filter((b) => b.startTime)
+    .map((b) => ({
+      start: parseMinutes(b.startTime),
+      end: parseMinutes(b.endTime),
+    }));
+
   return (
     <table className="table table-bordered">
       <tbody>
