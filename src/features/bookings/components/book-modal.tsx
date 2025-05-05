@@ -15,11 +15,13 @@ import { useQueries } from "@tanstack/react-query";
 import { Booking } from "../types/models";
 import { useGetBuilding } from "../../building/api/get-buiding";
 import { Space } from "../../spaces/types/models";
-import { addHours, format, formatISO, isSameDay, parseISO } from "date-fns";
+import { addHours, formatISO, parse, parseISO } from "date-fns";
 import { usePostBooking } from "../api/post-booking";
 import { PostBookingRequest } from "../../../types/api";
 import { useUser } from "../../../lib/auth";
 import { bookingUsages } from "../types/enums";
+import emitter from "../../../utils/emitter";
+import { showApiError } from "../../../utils/error";
 
 interface BookModalProps {
   spaces: Space[];
@@ -165,18 +167,16 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
       );
       resetInfo();
       handleClose();
+      emitter.emit('bookingCreated')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error("Error al crear la reserva", err);
-      Swal.fire(
-        "Error",
-        err.message ?? "No se pudo realizar la reserva.",
-        "error"
-      );
+      showApiError(err);
     }
   };
 
   const renderStepContent = () => {
+    const target = parse(fecha, 'dd/MM/yyyy', new Date())
+
     switch (currentStep) {
       case 0:
         return (
@@ -189,14 +189,12 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
             duracion={duracion}
             setDuracion={setDuracion}
             spaces={spaces}
-            bookings={bookings.filter(
-              (b) =>
-                fecha &&
-                isSameDay(
-                  format(new Date(b.periodo.inicio), "dd/MM/yyyy"),
-                  fecha
-                )
-            )}
+            bookings={bookings.filter(reserva => {
+              const inicio = new Date(reserva.periodo.inicio);
+              return inicio.getFullYear() === target.getFullYear()
+                  && inicio.getMonth()    === target.getMonth()
+                  && inicio.getDate()     === target.getDate();
+            })}
             building={building!}
           />
         );

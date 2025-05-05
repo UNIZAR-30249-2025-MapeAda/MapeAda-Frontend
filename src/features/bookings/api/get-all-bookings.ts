@@ -14,6 +14,6 @@ export const useGetAllBookings = () => {
   return useQuery<Booking[], Error>({
     queryKey: ["bookings", "all"],
     queryFn: getAllBookings,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 };

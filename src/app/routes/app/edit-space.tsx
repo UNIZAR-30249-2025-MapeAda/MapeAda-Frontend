@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import { Intervalo, Propietarios } from "../../../features/spaces/types/models";
 import { useState, useCallback } from "react";
 import { usePatchSpace } from "../../../features/spaces/api/patch-space";
+import { showApiError } from "../../../utils/error";
 
 type RouteParams = {
   spaceId: string;
@@ -64,7 +65,7 @@ const EditSpace = () => {
       Swal.fire("¡Guardado!", "Espacio actualizado correctamente", "success");
       setHasUnsaved(false);
     } catch (err) {
-      Swal.fire("Error", String(err), "error");
+      showApiError(err);
     }
   };
 

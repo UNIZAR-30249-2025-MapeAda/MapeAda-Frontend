@@ -7,10 +7,10 @@ import { LoadingIndicator } from "../../../components/ui/loading-indicator";
 import { useGetBuilding } from "../../building/api/get-buiding";
 import { Building } from "../../building/types/models";
 import { useUser } from "../../../lib/auth";
-import { ADMIN_ROLE } from "../../../config/constants";
 import { Link } from "react-router";
 import { paths } from "../../../config/paths";
 import { formatHM } from "../../../utils/format";
+import { ADMIN_ROLE } from "../../auth/types/enums";
 
 export interface SpaceDetailsModalProps {
   space: Space;
@@ -140,7 +140,7 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
         >
           Añadir a la reserva
         </button>
-        {user.data?.role == ADMIN_ROLE && (
+        {ADMIN_ROLE.includes(user.data!.rol) && (
           <Link
             to={paths.app.spaces.getHref(space.id)}
             className="btn btn-warning px-3"

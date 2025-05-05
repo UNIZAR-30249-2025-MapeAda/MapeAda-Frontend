@@ -1,4 +1,4 @@
-import { ADMIN_ROLE, ALL_ROLES } from "./constants";
+import { ADMIN_ROLE, ALL_ROLES } from "../features/auth/types/enums";
 
 export const paths = {
   home: {
@@ -37,7 +37,7 @@ export const paths = {
       alive: {
         path: "bookings",
         getHref: () => "/app/bookings",
-        allowedRoles: [ADMIN_ROLE],
+        allowedRoles: ADMIN_ROLE,
       },
       user: {
         path: "bookings/user/:userId",

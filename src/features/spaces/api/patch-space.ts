@@ -9,7 +9,7 @@ const patchSpace = async ({
   id: string;
   data: PatchSpaceRequest;
 }) => {
-  await api.patch(`/api/spaces/${id}`, data);
+  await api.patch(`/api/spaces/${id}`, data, );
 };
 
 export const usePatchSpace = () => {

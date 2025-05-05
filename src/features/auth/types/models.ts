@@ -6,6 +6,6 @@ export type User = {
   telefono: string; 
   nip: string; 
   email: string; 
-  role: Rol;
+  rol: Rol;
   departamento: Departamento | null;
 };

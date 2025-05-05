@@ -84,7 +84,7 @@ const EditSpaceForm: React.FC<EditSpaceFormProps> = ({
       initial.current.reservable !== reservable ||
       initial.current.categoria !== categoria ||
       initial.current.propietarios !== JSON.stringify(propietarios) ||
-      initial.current.horario !== JSON.stringify(defaultHorario)
+      initial.current.horario !== JSON.stringify(horario)
     );
   }, [reservable, categoria, propietarios, horario, initial.current]);
 
@@ -114,63 +114,84 @@ const EditSpaceForm: React.FC<EditSpaceFormProps> = ({
 
   const addOwner = async () => {
     const soloUsuario = propietarios.length === 1 && propietarios[0].tipo === 2;
-
+  
+    const htmlContent = soloUsuario
+      ? `
+        <div class="mb-3">
+          <label for="ownerId" class="form-label">ID de Usuario</label>
+          <input
+            id="ownerId"
+            class="form-control"
+            placeholder="Introduce el ID"
+          />
+        </div>
+      `
+      : `
+        <div class="mb-3">
+          <label for="ownerType" class="form-label">Tipo de propietario</label>
+          <select id="ownerType" class="form-select mb-3">
+            <option value="EINA">EINA</option>
+            <option value="Departamento">Departamento</option>
+            <option value="Usuario">Usuario</option>
+          </select>
+  
+          <div id="group-ownerId" class="mb-3 d-none">
+            <label for="ownerId" class="form-label">ID</label>
+            <input
+              id="ownerId"
+              class="form-control"
+              placeholder="Introduce el ID"
+            />
+          </div>
+        </div>
+      `;
+  
     const { value: formValues } = await Swal.fire({
-      title: "Nuevo propietario",
-      html: soloUsuario
-        ? '<input id="ownerId" class="swal2-input" placeholder="ID" />'
-        : '<select id="ownerType" class="swal2-select" style="width:auto;max-width:100%;padding:0.5rem;margin-bottom:1rem;">' +
-          '<option value="EINA">EINA</option>' +
-          '<option value="Departamento">Departamento</option>' +
-          '<option value="Usuario">Usuario</option>' +
-          "</select>" +
-          '<input id="ownerId" class="swal2-input" placeholder="ID" style="display:none;" />',
+      title: 'Nuevo propietario',
+      html: htmlContent,
       didOpen: () => {
         if (!soloUsuario) {
-          const typeEl =
-            Swal.getPopup()!.querySelector<HTMLSelectElement>("#ownerType")!;
-          const idEl =
-            Swal.getPopup()!.querySelector<HTMLInputElement>("#ownerId")!;
-          typeEl.addEventListener("change", () => {
-            if (typeEl.value === "Departamento" || typeEl.value === "Usuario") {
-              idEl.style.display = "block";
+          const typeEl = Swal.getPopup()!.querySelector<HTMLSelectElement>('#ownerType')!;
+          const groupId = Swal.getPopup()!.querySelector<HTMLDivElement>('#group-ownerId')!;
+  
+          typeEl.addEventListener('change', () => {
+            if (typeEl.value === 'Departamento' || typeEl.value === 'Usuario') {
+              groupId.classList.remove('d-none');
             } else {
-              idEl.style.display = "none";
+              groupId.classList.add('d-none');
             }
           });
         }
       },
       preConfirm: () => {
+        const idEl = Swal.getPopup()!.querySelector<HTMLInputElement>('#ownerId')!;
         if (soloUsuario) {
-          const idEl =
-            Swal.getPopup()!.querySelector<HTMLInputElement>("#ownerId")!;
           if (!idEl.value) {
-            Swal.showValidationMessage("Debes introducir el ID");
+            Swal.showValidationMessage('Debes introducir el ID');
             return;
           }
-          return { tipo: "Usuario", id: idEl.value };
+          return { tipo: 'Usuario', id: idEl.value };
         } else {
-          const typeEl =
-            Swal.getPopup()!.querySelector<HTMLSelectElement>("#ownerType")!;
-          const idEl =
-            Swal.getPopup()!.querySelector<HTMLInputElement>("#ownerId")!;
-          const tipoVal = typeEl.value as "EINA" | "Departamento" | "Usuario";
+          const typeEl = Swal.getPopup()!.querySelector<HTMLSelectElement>('#ownerType')!;
+          const tipoVal = typeEl.value as 'EINA' | 'Departamento' | 'Usuario';
           const idVal = idEl.value;
-          if ((tipoVal === "Departamento" || tipoVal === "Usuario") && !idVal) {
-            Swal.showValidationMessage("Debes introducir el ID");
+          if ((tipoVal === 'Departamento' || tipoVal === 'Usuario') && !idVal) {
+            Swal.showValidationMessage('Debes introducir el ID');
             return;
           }
           return { tipo: tipoVal, id: idVal || tipoVal };
         }
       },
       showCancelButton: true,
+      confirmButtonText: 'Aceptar',
+      cancelButtonText: 'Cancelar'
     });
-
+  
     if (formValues) {
       const tipoCode =
-        formValues.tipo === "EINA"
+        formValues.tipo === 'EINA'
           ? 0
-          : formValues.tipo === "Departamento"
+          : formValues.tipo === 'Departamento'
           ? 1
           : 2;
       setPropietarios((owners) => [
@@ -183,8 +204,14 @@ const EditSpaceForm: React.FC<EditSpaceFormProps> = ({
 
   const handleHorarioChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setHorario((h) => ({ ...h, [name]: value }));
+    setHorario((prev) => {
+      const nuevo = { ...prev, [name]: value };
+      return nuevo;
+    });
+    onDirty?.();
   };
+
+  const padWithSeconds = (t: string) => (t.length === 5 ? `${t}:00` : t);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,13 +233,16 @@ const EditSpaceForm: React.FC<EditSpaceFormProps> = ({
       if (initial.current.propietarios !== JSON.stringify(propietarios)) {
         payload.propietarios = propietarios;
       }
-      const payloadHorario: Intervalo | null =
-        horario.inicio === defaultHorario.inicio &&
-        horario.fin === defaultHorario.fin
-          ? null
-          : horario;
-      if (payloadHorario !== null) {
-        payload.horario = payloadHorario;
+      const changedHorario =
+        horario.inicio !== defaultHorario.inicio ||
+        horario.fin !== defaultHorario.fin
+          ? {
+              inicio: padWithSeconds(horario.inicio),
+              fin: padWithSeconds(horario.fin),
+            }
+          : null;
+      if (changedHorario) {
+        payload.horario = changedHorario;
       }
       if (Object.keys(payload).length > 0) {
         await onSubmit(payload);
@@ -287,7 +317,6 @@ const EditSpaceForm: React.FC<EditSpaceFormProps> = ({
         <strong>Categoría: </strong>
         <Select
           options={[
-            { value: "", label: "-- Selecciona categoría --" },
             ...spaceCategories.map((label, idx) => ({
               value: String(idx),
               label,

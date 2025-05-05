@@ -22,24 +22,42 @@ const DurationStep: React.FC<DurationStepProps> = ({
   bookings,
   building,
 }) => {
+  console.log(bookings);
+
   const [slots, setSlots] = useState<string[]>([]);
   const [selected, setSelected] = useState<string[]>(
     duracion ? duracion.split(",") : []
   );
 
+  const minutesFromTimestamp = (ts: string) => {
+    const d = new Date(ts);
+    return d.getHours() * 60 + d.getMinutes();
+  };
+
+  const bookingRanges = bookings.map((b) => ({
+    start: minutesFromTimestamp(b.periodo.inicio),
+    end: minutesFromTimestamp(b.periodo.fin),
+  }));
+
   useEffect(() => {
     let startMin: number, endMin: number;
-    const rangedSpaces = spaces.filter((s) => s.startTime && s.endTime);
 
+    const rangedSpaces = spaces.filter(
+      (s) => s.horario.inicio && s.horario.fin
+    );
     if (rangedSpaces.length > 0) {
-      const starts = rangedSpaces.map((s) => parseMinutes(s.startTime!));
-      const ends = rangedSpaces.map((s) => parseMinutes(s.endTime!));
+      const starts = rangedSpaces.map((s) => parseMinutes(s.horario.inicio!));
+      const ends = rangedSpaces.map((s) => parseMinutes(s.horario.fin));
       startMin = Math.max(...starts);
       endMin = Math.min(...ends);
     } else {
       // horario por defecto del edificio
-      startMin = parseMinutes(building.calendarioApertura.intervaloPorDefecto.inicio);
-      endMin = parseMinutes(building.calendarioApertura.intervaloPorDefecto.fin);
+      startMin = parseMinutes(
+        building.calendarioApertura.intervaloPorDefecto.inicio
+      );
+      endMin = parseMinutes(
+        building.calendarioApertura.intervaloPorDefecto.fin
+      );
     }
 
     const generated: string[] = [];
@@ -47,13 +65,6 @@ const DurationStep: React.FC<DurationStepProps> = ({
       generated.push(formatMinutes(t));
     }
     setSlots(generated);
-
-    const bookingRanges = bookings
-      .filter((b) => b.periodo.inicio)
-      .map((b) => ({
-        start: parseMinutes(b.periodo.inicio),
-        end: parseMinutes(b.periodo.fin),
-      }));
 
     const filtered = selected.filter((h) => {
       const m = parseMinutes(h);
@@ -67,12 +78,6 @@ const DurationStep: React.FC<DurationStepProps> = ({
   }, [fecha, bookings, spaces, building, setDuracion]);
 
   const toggle = (hour: string) => {
-    const bookingRanges = bookings
-      .filter((b) => b.periodo.inicio)
-      .map((b) => ({
-        start: parseMinutes(b.periodo.inicio),
-        end: parseMinutes(b.periodo.fin),
-      }));
     const m = parseMinutes(hour);
     if (bookingRanges.some((r) => m >= r.start && m < r.end)) return;
 
@@ -109,13 +114,6 @@ const DurationStep: React.FC<DurationStepProps> = ({
   for (let i = 0; i < slots.length; i += columns) {
     rows.push(slots.slice(i, i + columns));
   }
-
-  const bookingRanges = bookings
-    .filter((b) => b.periodo.inicio)
-    .map((b) => ({
-      start: parseMinutes(b.periodo.inicio),
-      end: parseMinutes(b.periodo.fin),
-    }));
 
   return (
     <table className="table table-bordered">

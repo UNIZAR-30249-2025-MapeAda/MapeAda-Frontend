@@ -8,8 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC } from "react";
 import { Link, useNavigate } from "react-router";
 import { paths } from "../../config/paths";
-import { ADMIN_ROLE } from "../../config/constants";
 import { useUser, useLogout } from "../../lib/auth";
+import { ADMIN_ROLE } from "../../features/auth/types/enums";
 
 interface UserMenuProps {
   className?: string;
@@ -51,7 +51,7 @@ export const UserMenu: FC<UserMenuProps> = ({ className = "" }) => {
             aria-label="Close"
           ></button>
         </div>
-        <span className="fs-5 fw-bold">¡Hola {user.data?.username}!</span>
+        <span className="fs-5 fw-bold">¡Hola {user.data?.nombre}!</span>
         <div className="bg-white rounded mt-3">
           <Link
             to={paths.app.bookings.user.getHref(user.data!.nip)}
@@ -61,7 +61,7 @@ export const UserMenu: FC<UserMenuProps> = ({ className = "" }) => {
             <span>Mis Reservas</span>
           </Link>
           <hr className="dropdown-divider mx-3" />
-          {user.data?.role == ADMIN_ROLE && (
+          {ADMIN_ROLE.includes(user.data!.rol) && (
             <>
               <Link to={paths.app.bookings.alive.getHref()} className="btn">
                 <FontAwesomeIcon icon={faEye} className="me-3" />

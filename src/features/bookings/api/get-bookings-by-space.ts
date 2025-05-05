@@ -13,7 +13,7 @@ const getBookingsBySpace = async (id: string): Promise<Booking[]> => {
 export const getBookingsBySpaceQuery = (id: string) => ({
   queryKey: ["bookings", "space", id],
   queryFn: () => getBookingsBySpace(id),
-  staleTime: 1000 * 60 * 5,
+  staleTime: 0,
 });
 
 export const useGetBookingsBySpace = (id: string) =>

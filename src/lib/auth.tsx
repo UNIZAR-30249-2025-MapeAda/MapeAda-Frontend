@@ -18,7 +18,8 @@ const logoutFn = async (): Promise<void> => {
 };
 
 const loginFn = async (data: LoginRequest): Promise<User> => {
-  const { data: loginResponse } = await api.post<LoginResponse>("/auth/login",data);
+  const loginResponse: LoginResponse = await api.post("/api/auth/login", data);
+
   localStorage.setItem("token", loginResponse.token);
   localStorage.setItem("user", JSON.stringify(loginResponse.usuario));
 

@@ -19,6 +19,7 @@
     "bootstrap": "^5.3.5",
     "date-fns": "^4.1.0",
     "leaflet": "^1.9.4",
+    "mitt": "^3.0.1",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.9",
     "react-datepicker": "^8.3.0",

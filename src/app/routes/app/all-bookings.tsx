@@ -18,6 +18,7 @@ import {
   bookingUsages,
 } from "../../../features/bookings/types/enums";
 import { format } from "date-fns";
+import { showApiError } from "../../../utils/error";
 
 const AllBookings = () => {
   const { data = [], isLoading, error } = useGetAllBookings();
@@ -178,8 +179,7 @@ const AllBookings = () => {
       setOriginalValid([...currentValid]);
       Swal.fire("¡Guardados!", "Los cambios se han guardado.", "success");
     } catch (err) {
-      console.error("Error al guardar los cambios", err);
-      Swal.fire("Error", "No se han podido guardar los cambios.", "error");
+      showApiError(err);
     }
   };
 
@@ -202,8 +202,7 @@ const AllBookings = () => {
             Swal.fire("¡Eliminada!", "La reserva fue eliminada.", "success");
           },
           onError: (err) => {
-            console.error("Error al eliminar la reserva", err);
-            Swal.fire("Error", "No se pudo eliminar la reserva.", "error");
+            showApiError(err);
           },
         });
       }

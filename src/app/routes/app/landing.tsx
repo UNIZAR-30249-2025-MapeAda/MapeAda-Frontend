@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import BookModal from "../../../features/bookings/components/book-modal";
 import { Map } from "../../../components/ui/map";
 import { Navbar } from "../../../components/ui/navbar";
@@ -15,8 +15,19 @@ import {
   spaceCategories,
   SpaceCategory,
 } from "../../../features/spaces/types/enums";
+import emitter from "../../../utils/emitter";
+import { useGetAllBookings } from "../../../features/bookings/api/get-all-bookings";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router";
+import { paths } from "../../../config/paths";
+import { useUser } from "../../../lib/auth";
 
 function Landing() {
+  const {
+    data: bookings = [],
+    isLoading: isLoadingBookings,
+    error: errorBookings,
+  } = useGetAllBookings();
   const [floor, setFloor] = useState(0);
   const [showBookModal, setShowBookModal] = useState(false);
   const [showBookingList, setShowBookingList] = useState(false);
@@ -25,6 +36,7 @@ function Landing() {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState<SpaceCategory | undefined>();
   const [minCapacity, setMinCapacity] = useState<number | undefined>();
+  const user = useUser();
   const filters = useMemo(
     () => ({
       planta: floor.toString(),
@@ -40,6 +52,40 @@ function Landing() {
     () => selectedSpaces.map((s) => s.nombre),
     [selectedSpaces]
   );
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handler = () => {
+      setSelectedSpaces([]);
+      setShowBookingList(false);
+    };
+    emitter.on("bookingCreated", handler);
+    return () => {
+      emitter.off("bookingCreated", handler);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (bookings.length > 0) {
+      const deletedAndInvalidBookings = bookings.filter(
+        (b) => !b.deletedAt || !b.valida || !b.invalidSince
+      );
+      if (deletedAndInvalidBookings.length > 0) {
+        Swal.fire({
+          title: "¡Atención!",
+          text: "Tienes reservas potencialmente inválidas y/o eliminadas",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Ir a mis reservas",
+          cancelButtonText: "Revisar más tarde",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate(paths.app.bookings.user.getHref(user.data!.nip));
+          }
+        });
+      }
+    }
+  }, [bookings]);
 
   const removeSpaceFromBookingList = (index: number) => {
     setSelectedSpaces((prev) => {
@@ -81,7 +127,7 @@ function Landing() {
     setShowSpaceDetailsModal(true);
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingBookings) {
     return <LoadingIndicator message="Cargando espacios..." />;
   }
 
@@ -89,6 +135,14 @@ function Landing() {
     return (
       <ErrorMessage
         message={`Error al cargar espacios de la planta ${floor}.`}
+      />
+    );
+  }
+
+  if (errorBookings) {
+    return (
+      <ErrorMessage
+        message={"Error obteniendo las reservas del usuario."}
       />
     );
   }

@@ -31,11 +31,13 @@ export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
+api.defaults.headers.patch['Content-Type'] = 'application/json-patch+json';
+
 api.interceptors.request.use(authRequestInterceptor);
 api.interceptors.response.use(
   (res) => res.data,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && window.location.pathname != paths.auth.login.getHref()) {
       const searchParams = new URLSearchParams();
       const redirectTo =
         searchParams.get("redirectTo") || window.location.pathname;

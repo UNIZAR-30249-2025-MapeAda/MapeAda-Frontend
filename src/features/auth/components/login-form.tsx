@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router";
 import { paths } from "../../../config/paths";
-import { loginInputSchema, useLogin } from "../../../lib/auth";
+import { useLogin } from "../../../lib/auth";
+import { showApiError } from "../../../utils/error";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const LoginForm = () => {
       navigate(paths.app.root.getHref());
     },
     onError: (error: unknown) => {
-      Swal.fire("Error", String(error), "error");
+      showApiError(error);
     },
   });
 
@@ -22,11 +23,14 @@ const LoginForm = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const parsed = loginInputSchema.safeParse(form);
 
-    if (!parsed.success) {
-      Swal.fire("Error", "Introduce un email válido", "error");
-      return;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(form.email)) {
+      return Swal.fire(
+        "Email inválido",
+        "Por favor introduce un correo electrónico válido.",
+        "error"
+      );
     }
 
     login.mutate(form);

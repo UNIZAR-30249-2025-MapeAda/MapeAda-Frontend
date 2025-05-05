@@ -1,14 +1,23 @@
 export enum Rol {
-    Estudiante = "Estudiante",
-    InvestigadorContratado = "InvestigadorContratado",
-    DocenteInvestigador = "DocenteInvestigador",
-    Conserje = "Conserje",
-    TecnicoLaboratorio = "TecnicoLaboratorio",
-    Gerente = "Gerente",
-    GerenteDocenteInvestigador = "GerenteDocenteInvestigador",
-  }
-  
-  export enum Departamento {
-    InformaticaEIngenieriaDeSistemas = "InformaticaEIngenieriaDeSistemas",
-    IngenieriaElectronicaYComunicaciones = "IngenieriaElectronicaYComunicaciones",
-  }
+  Estudiante = 0,
+  InvestigadorContratado,
+  DocenteInvestigador,
+  Conserje,
+  TecnicoLaboratorio,
+  Gerente,
+  GerenteDocenteInvestigador,
+}
+
+export const ALL_ROLES: Rol[] = Object
+  .values(Rol)
+  .filter((v) => typeof v === "number") as Rol[];
+
+export const ADMIN_ROLE: Rol[] = [
+  Rol.Gerente,
+  Rol.GerenteDocenteInvestigador,
+];
+
+export enum Departamento {
+  InformaticaEIngenieriaDeSistemas = 0,
+  IngenieriaElectronicaYComunicaciones,
+}
