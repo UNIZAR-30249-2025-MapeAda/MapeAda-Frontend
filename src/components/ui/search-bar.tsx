@@ -1,23 +1,22 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 interface SearchBarProps {
-  onSearch?: (query: string) => void;
+  searchText: string;
+  setSearchText: (text: string) => void;
   className?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch, className = "" }) => {
-  const [searchText, setSearchText] = useState("");
+const SearchBar: React.FC<SearchBarProps> = ({ searchText, setSearchText, className = "" }) => {
+  const [localText, setLocalText] = useState(searchText);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchText(event.target.value);
+    setLocalText(event.target.value);
   };
 
   const handleSearch = () => {
-    if (onSearch) {
-      onSearch(searchText);
-    }
+    setSearchText(localText.trim());
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -33,7 +32,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, className = "" }) => {
         className="form-control rounded-pill border-0"
         placeholder="Buscar"
         aria-label="Buscar"
-        value={searchText}
+        value={localText}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
       />

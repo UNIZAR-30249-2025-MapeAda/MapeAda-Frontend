@@ -18,6 +18,7 @@ export const usePatchSpace = () => {
     mutationFn: patchSpace,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["space"] });
+      qc.invalidateQueries({ queryKey: ["spaces", "filters"] });
     },
   });
 };

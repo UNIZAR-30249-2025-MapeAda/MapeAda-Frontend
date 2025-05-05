@@ -1,4 +1,4 @@
-import { FC, useState, ChangeEvent } from "react";
+import { FC, ChangeEvent, useState } from "react";
 import { Select } from "./select";
 import { UserMenu } from "./user-menu";
 import SearchBar from "./search-bar";
@@ -24,12 +24,27 @@ export const Navbar: FC<NavBarProps> = ({
   minCapacity,
   setMinCapacity,
 }) => {
-  const handleCategoryChange = (newCategory: SpaceCategory) => {
-    setCategory(newCategory);
+  const [localMinCapacity, setLocalMinCapacity] = useState<string>(
+    minCapacity != null ? String(minCapacity) : ""
+  );
+
+  const handleCategoryChange = (category: string) => {
+    if (category === "categoria") {
+      setCategory(undefined);
+    } else {
+      setCategory(category as SpaceCategory);
+    }
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setMinCapacity(Number(event.target.value));
+    setLocalMinCapacity(event.target.value);
+  };
+
+  const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      const value = parseInt(localMinCapacity);
+      setMinCapacity(isNaN(value) ? undefined : value);
+    }
   };
 
   return (
@@ -38,7 +53,7 @@ export const Navbar: FC<NavBarProps> = ({
       style={{ zIndex: 10000 }}
     >
       <div className="col-3">
-        <SearchBar />
+        <SearchBar searchText={searchText} setSearchText={setSearchText} />
       </div>
       <div className="col row ms-3 gap-2">
         <Select
@@ -49,19 +64,17 @@ export const Navbar: FC<NavBarProps> = ({
               label: status,
             })),
           ]}
-          initialValue="categoria"
-          onChange={(newValue) =>
-            handleCategoryChange(newValue as SpaceCategory)
-          }
+          initialValue={category ?? "categoria"}
+          onChange={(newValue) => handleCategoryChange(newValue)}
         />
         <input
           type="text"
           className="form-control rounded-pill border-0 ps-3 w-auto shadow"
           placeholder="Capacidad máxima"
           aria-label="Capacidad máxima"
-          value={minCapacity}
+          value={localMinCapacity}
           onChange={handleInputChange}
-          onKeyDown={(newValue) => console.log(newValue)}
+          onKeyDown={handleInputKeyDown}
         />
       </div>
       <UserMenu className="col-1 text-end" />

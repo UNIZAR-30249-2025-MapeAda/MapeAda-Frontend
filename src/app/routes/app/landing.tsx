@@ -9,9 +9,12 @@ import type { Feature } from "geojson";
 import { BookingList } from "../../../features/bookings/components/booking-list";
 import { LoadingIndicator } from "../../../components/ui/loading-indicator";
 import { ErrorMessage } from "../../../components/errors/error-message";
-import { useGetSpacesByFloor } from "../../../features/spaces/api/get-spaces-by-floor";
+import { useGetSpaces } from "../../../features/spaces/api/get-spaces";
 import SpaceLegend from "../../../features/spaces/components/space-leyend";
-import { SpaceCategory } from "../../../features/spaces/types/enums";
+import {
+  spaceCategories,
+  SpaceCategory,
+} from "../../../features/spaces/types/enums";
 
 function Landing() {
   const [floor, setFloor] = useState(0);
@@ -19,15 +22,24 @@ function Landing() {
   const [showBookingList, setShowBookingList] = useState(false);
   const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
   const [showSpaceDetailsModal, setShowSpaceDetailsModal] = useState(false);
-  const { data: spaces, isLoading, error } = useGetSpacesByFloor(floor);
+  const [searchText, setSearchText] = useState("");
+  const [category, setCategory] = useState<SpaceCategory | undefined>();
+  const [minCapacity, setMinCapacity] = useState<number | undefined>();
+  const filters = useMemo(
+    () => ({
+      planta: floor.toString(),
+      nombre: searchText || undefined,
+      categoria: category ? spaceCategories.indexOf(category) : undefined,
+      capacidadMaxima: minCapacity,
+    }),
+    [floor, searchText, category, minCapacity]
+  );
+  const { data: spaces, isLoading, error } = useGetSpaces(filters);
   const [selectedSpaces, setSelectedSpaces] = useState<Space[]>([]);
   const selectedSpaceNames = useMemo(
     () => selectedSpaces.map((s) => s.nombre),
     [selectedSpaces]
   );
-  const [searchText, setSearchText] = useState("");
-  const [category, setCategory] = useState<SpaceCategory | undefined>();
-  const [minCapacity, setMinCapacity] = useState<number | undefined>();
 
   const removeSpaceFromBookingList = (index: number) => {
     setSelectedSpaces((prev) => {
@@ -101,7 +113,6 @@ function Landing() {
       />
       <Map
         spaces={spaces!}
-        floor={floor}
         selectedSpaces={selectedSpaces.map((s) => s.id)}
         onFeatureClick={handleFeatureClick}
       />

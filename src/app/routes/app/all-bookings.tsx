@@ -24,7 +24,6 @@ const AllBookings = () => {
   const bookings = data.filter((b) => b.deletedAt == null);
   const patchBookingMutation = usePatchBooking();
   const deleteBookingMutation = useDeleteBooking();
-
   const [originalValid, setOriginalValid] = useState<boolean[]>([]);
   const [currentValid, setCurrentValid] = useState<boolean[]>([]);
 
@@ -144,12 +143,12 @@ const AllBookings = () => {
   ];
 
   useEffect(() => {
-    if (bookings.length) {
+    if (bookings.length > 0 && currentValid.length === 0) {
       const valids = bookings.map((b) => b.valida);
       setOriginalValid(valids);
       setCurrentValid(valids);
     }
-  }, [bookings]);
+  }, [bookings, currentValid.length]);
 
   const handleValidChange = (index: number, newValue: string) => {
     const updated = [...currentValid];
@@ -214,7 +213,10 @@ const AllBookings = () => {
   const hasChanges =
     JSON.stringify(originalValid) !== JSON.stringify(currentValid);
 
-  if (isLoading) {
+  if (
+    isLoading ||
+    (bookings.length > 0 && currentValid.length !== bookings.length)
+  ) {
     return <LoadingIndicator message="Cargando reservas..." />;
   }
 

@@ -1,27 +1,35 @@
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import type { Feature, FeatureCollection } from "geojson";
 import { CAMPUS_COORDS, CATEGORY_COLORS } from "../../config/constants";
+import { useRef, useEffect } from "react";
 
 interface MapProps {
   spaces: FeatureCollection;
-  floor: number;
   selectedSpaces?: string[];
   onFeatureClick?: (feature: Feature) => void;
 }
 
 export const Map: React.FC<MapProps> = ({
   spaces,
-  floor,
   selectedSpaces = [],
   onFeatureClick,
 }) => {
+  const geoJsonRef = useRef<L.GeoJSON>(null);
+
+  useEffect(() => {
+    const layer = geoJsonRef.current;
+    if (!layer) return;
+    layer.clearLayers();
+    layer.addData(spaces);
+  }, [spaces]);
+
   function getStyle(feature?: Feature): L.PathOptions {
     const props = feature!.properties;
     const catIndex: number = props!.categoria;
     const isReservable: boolean = props!.reservable;
     const isSelected: boolean = selectedSpaces.includes(String(feature!.id));
-    const fillColor = CATEGORY_COLORS[catIndex] ?? '#cccccc';
-  
+    const fillColor = CATEGORY_COLORS[catIndex] ?? "#cccccc";
+
     return {
       fillColor,
       fillOpacity: isReservable ? (isSelected ? 1 : 0.5) : 0.2,
@@ -49,7 +57,7 @@ export const Map: React.FC<MapProps> = ({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <GeoJSON
-        key={floor}
+        ref={geoJsonRef}
         data={spaces}
         style={getStyle}
         onEachFeature={(feature, layer) => {

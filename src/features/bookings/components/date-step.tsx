@@ -1,5 +1,5 @@
 import { es } from "date-fns/locale";
-import React from "react";
+import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import { addYears, format } from "date-fns";
 import { Building } from "../../building/types/models";
@@ -11,6 +11,8 @@ interface DateStepProps {
 }
 
 const DateStep: React.FC<DateStepProps> = ({ fecha, setFecha, building }) => {
+  const [fechaSeleccionada, setFechaSeleccionada] = useState<Date | null>(fecha ? new Date(fecha) : new Date());
+
   const filterDate = (date: Date) => {
     const dayOfWeek = (date.getDay() + 6) % 7; // 0 = Monday ... 6 = Sunday
 
@@ -40,6 +42,7 @@ const DateStep: React.FC<DateStepProps> = ({ fecha, setFecha, building }) => {
   };
 
   const handleDateChange = (date: Date | null) => {
+    setFechaSeleccionada(date);
     if (date) {
       setFecha(format(date, "dd/MM/yyyy"));
     }
@@ -48,7 +51,7 @@ const DateStep: React.FC<DateStepProps> = ({ fecha, setFecha, building }) => {
   return (
     <DatePicker
       locale={es}
-      selected={fecha ? new Date(fecha) : new Date()}
+      selected={fechaSeleccionada}
       onChange={handleDateChange}
       inline
       minDate={new Date()}

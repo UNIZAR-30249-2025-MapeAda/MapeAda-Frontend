@@ -99,7 +99,7 @@ export type GetSpacesByFiltersParams = {
   nombre?: string;
   categoria?: number;
   capacidadMaxima?: number;
-  planta?: string;
+  planta: string;
 };
 
 export type PatchSpaceRequest = JsonPatchOp[];
