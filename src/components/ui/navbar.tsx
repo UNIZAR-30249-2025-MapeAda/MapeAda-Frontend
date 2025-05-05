@@ -7,16 +7,29 @@ import {
   SpaceCategory,
 } from "../../features/spaces/types/enums";
 
-export const Navbar: FC = () => {
-  const [currentCategory, setCurrentCategory] = useState<SpaceCategory>();
-  const [capacityText, setCapacityText] = useState("");
+type NavBarProps = {
+  searchText: string;
+  setSearchText: (text: string) => void;
+  category?: SpaceCategory;
+  setCategory: (category?: SpaceCategory) => void;
+  minCapacity?: number;
+  setMinCapacity: (value?: number) => void;
+};
 
+export const Navbar: FC<NavBarProps> = ({
+  searchText,
+  setSearchText,
+  category,
+  setCategory,
+  minCapacity,
+  setMinCapacity,
+}) => {
   const handleCategoryChange = (newCategory: SpaceCategory) => {
-    setCurrentCategory(newCategory);
+    setCategory(newCategory);
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCapacityText(event.target.value);
+    setMinCapacity(Number(event.target.value));
   };
 
   return (
@@ -46,7 +59,7 @@ export const Navbar: FC = () => {
           className="form-control rounded-pill border-0 ps-3 w-auto shadow"
           placeholder="Capacidad máxima"
           aria-label="Capacidad máxima"
-          value={capacityText}
+          value={minCapacity}
           onChange={handleInputChange}
           onKeyDown={(newValue) => console.log(newValue)}
         />

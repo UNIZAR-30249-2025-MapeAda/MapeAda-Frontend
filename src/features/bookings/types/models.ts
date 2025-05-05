@@ -1,14 +1,19 @@
 import { BookingUsage } from "./enums";
 
+type Intervalo = {
+  inicio: string;
+  fin: string;
+}
+
 export type Booking = {
   id: number;
-  userNip: string;
-  spaces: string[];
-  date: Date;
-  startTime: string;
-  endTime: string;
-  assistants: number;
-  usage: BookingUsage;
-  details?: string;
-  valid: boolean;
+  espacios: string[];
+  usuario: string;
+  uso: BookingUsage;
+  asistentes: number;
+  periodo: Intervalo;
+  observaciones?: string;
+  valida: boolean;
+  invalidSince?: string;
+  deletedAt?: string;
 };

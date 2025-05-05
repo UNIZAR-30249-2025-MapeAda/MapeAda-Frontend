@@ -13,11 +13,15 @@ import { usePatchBooking } from "../../../features/bookings/api/patch-booking";
 import { Select } from "../../../components/ui/select";
 import { Link } from "react-router";
 import { paths } from "../../../config/paths";
-import { BookingUsage } from "../../../features/bookings/types/enums";
+import {
+  BookingUsage,
+  bookingUsages,
+} from "../../../features/bookings/types/enums";
 import { format } from "date-fns";
 
 const AllBookings = () => {
-  const { data: bookings = [], isLoading, error } = useGetAllBookings();
+  const { data = [], isLoading, error } = useGetAllBookings();
+  const bookings = data.filter((b) => b.deletedAt == null);
   const patchBookingMutation = usePatchBooking();
   const deleteBookingMutation = useDeleteBooking();
 
@@ -57,28 +61,36 @@ const AllBookings = () => {
 
   const tableColumns: Column<Booking>[] = [
     { header: "ID", accessor: "id" },
-    { header: "Usuario", accessor: "userNip" },
+    { header: "Usuario", accessor: "usuario" },
     {
       header: "Espacios",
-      accessor: "spaces",
-      render: (row) => row.spaces.join(", "),
+      accessor: "espacios",
+      render: (row) => row.espacios.join(", "),
     },
     {
       header: "Fecha",
-      accessor: "date",
-      render: (row) => format(new Date(row.date), "dd/MM/yyyy"),
+      accessor: "periodo.inicio",
+      render: (row) => format(new Date(row.periodo.inicio), "dd/MM/yyyy"),
     },
     {
       header: "Duración",
       accessor: "",
-      render: (row) => `${row.startTime} - ${row.endTime}`,
+      render: (row) => {
+        const inicio = new Date(row.periodo.inicio);
+        const fin = new Date(row.periodo.fin);
+
+        const horaInicio = format(inicio, "HH:mm");
+        const horaFin = format(fin, "HH:mm");
+        return `${horaInicio} - ${horaFin}`;
+      },
     },
-    { header: "Asistentes", accessor: "assistants" },
+    { header: "Asistentes", accessor: "asistentes" },
     {
       header: "Uso",
-      accessor: "usage",
+      accessor: "uso",
       render: (row) => {
-        const styles = usageStyles[row.usage] ?? {
+        const bookingUsage = bookingUsages[Number(row.uso)];
+        const styles = usageStyles[bookingUsage] ?? {
           text: "text-dark",
           bg: "bg-light",
           border: "border-dark border-opacity-10",
@@ -94,28 +106,24 @@ const AllBookings = () => {
             ${styles.border}
           `}
           >
-            {row.usage}
+            {bookingUsage}
           </small>
         );
       },
     },
     {
       header: "Detalles",
-      accessor: "details",
-      render: (row) => row.details || "-",
+      accessor: "observaciones",
+      render: (row) => row.observaciones || "-",
     },
     {
-      header: "Válido",
-      accessor: "valid",
-      render: (_row, index) => {
-        const valueStr =
-          currentValid[index] !== undefined
-            ? currentValid[index].toString()
-            : undefined;
+      header: "Validez",
+      accessor: "valida",
+      render: (_, index) => {
         return (
           <Select
             options={validOptions}
-            initialValue={valueStr}
+            initialValue={currentValid[index] ? "true" : "false"}
             onChange={(newValue) => handleValidChange(index, newValue)}
           />
         );
@@ -137,7 +145,7 @@ const AllBookings = () => {
 
   useEffect(() => {
     if (bookings.length) {
-      const valids = bookings.map((b) => b.valid);
+      const valids = bookings.map((b) => b.valida);
       setOriginalValid(valids);
       setCurrentValid(valids);
     }
@@ -165,7 +173,7 @@ const AllBookings = () => {
       for (const change of changes) {
         await patchBookingMutation.mutateAsync({
           id: change.id,
-          data: { valid: change.valid },
+          data: [{ op: "replace", path: "/valida", value: change.valid }],
         });
       }
       setOriginalValid([...currentValid]);

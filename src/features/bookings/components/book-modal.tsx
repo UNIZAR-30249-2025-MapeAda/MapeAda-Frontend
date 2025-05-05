@@ -15,7 +15,11 @@ import { useQueries } from "@tanstack/react-query";
 import { Booking } from "../types/models";
 import { useGetBuilding } from "../../building/api/get-buiding";
 import { Space } from "../../spaces/types/models";
-import { isSameDay } from "date-fns";
+import { addHours, format, formatISO, isSameDay, parseISO } from "date-fns";
+import { usePostBooking } from "../api/post-booking";
+import { PostBookingRequest } from "../../../types/api";
+import { useUser } from "../../../lib/auth";
+import { bookingUsages } from "../types/enums";
 
 interface BookModalProps {
   spaces: Space[];
@@ -24,6 +28,7 @@ interface BookModalProps {
 }
 
 const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
+  const user = useUser();
   const totalSteps = 4;
   const [currentStep, setCurrentStep] = useState(0);
   const [fecha, setFecha] = useState<string>("");
@@ -31,7 +36,7 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
   const [uso, setUso] = useState<string>("");
   const [asistentes, setAsistentes] = useState(0);
   const [detallesAdicionales, setDetallesAdicionales] = useState<string>("");
-  const spacesNames = useMemo(() => spaces.map((s) => s.name), [spaces]);
+  const spacesNames = useMemo(() => spaces.map((s) => s.nombre), [spaces]);
 
   const {
     data: building,
@@ -42,6 +47,8 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
   const bookingQueries = useQueries({
     queries: spaces.map((s) => getBookingsBySpaceQuery(s.id)),
   });
+
+  const postBookingMutation = usePostBooking();
 
   const loadingBookings = bookingQueries.some((q) => q.isLoading);
   const errorBookings = bookingQueries.find((q) => q.error)?.error;
@@ -55,14 +62,15 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
   const error = errorBuilding || errorBookings;
 
   const capacidadTotal = useMemo(() => {
-    return spaces.reduce((total, s) => total + s.capacity, 0);
+    return spaces.reduce((total, s) => total + s.capacidad, 0);
   }, [spaces]);
-  
+
   const maxAsistentes = useMemo(() => {
     if (!building) return 0;
-    return Math.floor((capacidadTotal * building.maxUse.value) / 100);
-  }, [capacidadTotal, building]);  
-  
+    return Math.floor(
+      (capacidadTotal * building.porcentajeUsoMaximo.valor) / 100
+    );
+  }, [capacidadTotal, building]);
 
   const isStepValid = () => {
     switch (currentStep) {
@@ -120,14 +128,52 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
     setCurrentStep(0);
   };
 
-  const confirm = () => {
-    resetInfo();
-    handleClose();
-    Swal.fire(
-      "¡Completada!",
-      "Su reserva se ha realizado con éxito.",
-      "success"
-    );
+  const confirm = async () => {
+    const [day, month, year] = fecha.split("/");
+    const dateIso = `${year}-${month}-${day}`;
+
+    const slots = duracion.split(",");
+    const inicioSlot = slots[0];
+    const ultimoSlot = slots[slots.length - 1];
+
+    const inicioIso = `${dateIso}T${inicioSlot}:00`;
+    const ultimoIso = `${dateIso}T${ultimoSlot}:00`;
+
+    const finDate = addHours(parseISO(ultimoIso), 1);
+    const finIso = formatISO(finDate, { representation: "complete" });
+
+    const request: PostBookingRequest = {
+      nip: user.data!.nip,
+      espacios: spaces.map((s) => String(s.id)),
+      uso: bookingUsages.indexOf(uso),
+      asistentes,
+      periodo: {
+        inicio: inicioIso,
+        fin: finIso,
+      },
+      observaciones: detallesAdicionales || undefined,
+    };
+
+    try {
+      await postBookingMutation.mutateAsync({
+        data: request,
+      });
+      Swal.fire(
+        "¡Completada!",
+        "Su reserva se ha realizado con éxito.",
+        "success"
+      );
+      resetInfo();
+      handleClose();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error("Error al crear la reserva", err);
+      Swal.fire(
+        "Error",
+        err.message ?? "No se pudo realizar la reserva.",
+        "error"
+      );
+    }
   };
 
   const renderStepContent = () => {
@@ -143,7 +189,14 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
             duracion={duracion}
             setDuracion={setDuracion}
             spaces={spaces}
-            bookings={bookings.filter((b) => fecha && isSameDay(b.date, fecha))}
+            bookings={bookings.filter(
+              (b) =>
+                fecha &&
+                isSameDay(
+                  format(new Date(b.periodo.inicio), "dd/MM/yyyy"),
+                  fecha
+                )
+            )}
             building={building!}
           />
         );

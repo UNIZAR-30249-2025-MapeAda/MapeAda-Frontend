@@ -10,24 +10,29 @@ interface DateStepProps {
   building: Building;
 }
 
-const DateStep: React.FC<DateStepProps> = ({
-  fecha,
-  setFecha,
-  building,
-}) => {
+const DateStep: React.FC<DateStepProps> = ({ fecha, setFecha, building }) => {
   const filterDate = (date: Date) => {
-    const iso = format(date, "yyyy-MM-dd");
-    const jsDay = date.getDay(); // 0=Sunday ... 6=Saturday
-    const isoWeekDay = jsDay === 0 ? 6 : jsDay - 1; // 0=Monday ... 6=Sunday
+    const dayOfWeek = (date.getDay() + 6) % 7; // 0 = Monday ... 6 = Sunday
 
-    if (!building.calendar.default.week[isoWeekDay]) {
-      return false;
+    const { diasPorDefecto, horariosApertura } = building!.calendarioApertura;
+
+    const mask = 1 << dayOfWeek;
+    const isDefaultWorkday = (diasPorDefecto & mask) !== 0;
+
+    const override = horariosApertura.find(
+      (r) => new Date(r.date).toDateString() === date.toDateString()
+    );
+
+    if (override) {
+      if (override.isHoliday) {
+        return false;
+      }
+      if (override.schedule) {
+        return true;
+      }
     }
 
-    const restriction = building.calendar.restrictions.find(
-      (r) => format(new Date(r.date), "yyyy-MM-dd") === iso
-    );
-    if (restriction?.isHoliday) {
+    if (!isDefaultWorkday) {
       return false;
     }
 
@@ -36,8 +41,7 @@ const DateStep: React.FC<DateStepProps> = ({
 
   const handleDateChange = (date: Date | null) => {
     if (date) {
-      const isoDate = format(date, "yyyy-MM-dd");
-      setFecha(isoDate);
+      setFecha(format(date, "dd/MM/yyyy"));
     }
   };
 

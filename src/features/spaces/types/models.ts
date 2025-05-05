@@ -1,16 +1,24 @@
 import { SpaceCategory } from "./enums";
 
-export interface Space {
+export type Intervalo = {
+  inicio: string;
+  fin: string;
+};
+
+export type Propietarios = {
+  tipo: number;
   id: string;
-  name: string;
-  dimension: DoubleRange;
-  type: SpaceCategory;
-  category: SpaceCategory;
-  floor: number;
-  capacity: number;
+};
+
+export type Space = {
+  id: string;
+  nombre: string;
+  tamanyo: DoubleRange;
+  tipo: SpaceCategory;
+  categoria: SpaceCategory;
+  planta: number;
+  capacidad: number;
   reservable: boolean;
-  startTime: string;
-  endTime: string;
-  ownerType: number;
-  ownerId: string;
+  horario: Intervalo;
+  propietarios: Propietarios[];
 }

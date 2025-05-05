@@ -11,6 +11,7 @@ export const useDeleteBooking = () => {
     mutationFn: deleteBooking,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["bookings", "all"] });
+      qc.invalidateQueries({ queryKey: ["bookings", "user"] });
       qc.invalidateQueries({ queryKey: ["bookings", "space"] });
     },
   });

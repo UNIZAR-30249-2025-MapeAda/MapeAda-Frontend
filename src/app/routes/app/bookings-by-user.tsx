@@ -13,16 +13,14 @@ import { paths } from "../../../config/paths";
 import {
   bookingStatuses,
   BookingUsage,
+  bookingUsages,
 } from "../../../features/bookings/types/enums";
 import { format } from "date-fns";
 
 const BookingsByUser = () => {
   const user = useUser();
-  const {
-    data: bookings = [],
-    isLoading,
-    error,
-  } = useGetBookingsByUser(user.data!.nip);
+  const { data = [], isLoading, error } = useGetBookingsByUser(user.data!.nip);
+  const bookings = data.filter((b) => b.deletedAt == null);
   const deleteBookingMutation = useDeleteBooking();
 
   const usageStyles: Record<
@@ -53,28 +51,36 @@ const BookingsByUser = () => {
 
   const tableColumns: Column<Booking>[] = [
     { header: "ID", accessor: "id" },
-    { header: "Usuario", accessor: "userNip" },
+    { header: "Usuario", accessor: "usuario" },
     {
       header: "Espacios",
       accessor: "spaces",
-      render: (row) => row.spaces.join(", "),
+      render: (row) => row.espacios.join(", "),
     },
     {
       header: "Fecha",
-      accessor: "date",
-      render: (row) => format(new Date(row.date), "dd/MM/yyyy"),
+      accessor: "periodo.inicio",
+      render: (row) => format(new Date(row.periodo.inicio), "dd/MM/yyyy"),
     },
     {
       header: "Duración",
       accessor: "",
-      render: (row) => `${row.startTime} - ${row.endTime}`,
+      render: (row) => {
+        const inicio = new Date(row.periodo.inicio);
+        const fin = new Date(row.periodo.fin);
+
+        const horaInicio = format(inicio, "HH:mm");
+        const horaFin = format(fin, "HH:mm");
+        return `${horaInicio} - ${horaFin}`;
+      },
     },
-    { header: "Asistentes", accessor: "assistants" },
+    { header: "Asistentes", accessor: "asistentes" },
     {
       header: "Uso",
-      accessor: "usage",
+      accessor: "uso",
       render: (row) => {
-        const styles = usageStyles[row.usage] ?? {
+        const bookingUsage = bookingUsages[Number(row.uso)];
+        const styles = usageStyles[bookingUsage] ?? {
           text: "text-dark",
           bg: "bg-light",
           border: "border-dark border-opacity-10",
@@ -83,36 +89,35 @@ const BookingsByUser = () => {
         return (
           <small
             className={`
-              px-2 py-1 fw-semibold
-              rounded
-              ${styles.text}
-              ${styles.bg}
-              ${styles.border}
-            `}
+                px-2 py-1 fw-semibold
+                rounded
+                ${styles.text}
+                ${styles.bg}
+                ${styles.border}
+              `}
           >
-            {row.usage}
+            {bookingUsage}
           </small>
         );
       },
     },
     {
       header: "Detalles",
-      accessor: "details",
-      render: (row) => row.details || "-",
+      accessor: "observaciones",
+      render: (row) => row.observaciones || "-",
     },
     {
-      header: "Válido",
-      accessor: "valid",
+      header: "Validez",
+      accessor: "valida",
       render: (row) => {
         const valueStr =
-          row.valid !== undefined
-            ? bookingStatuses[Number(row.valid)]
+          row.valida !== undefined
+            ? bookingStatuses[Number(row.valida)]
             : undefined;
-        console.log(row);
         return (
           <small
             className={`px-2 py-1 fw-semibold bg-opacity-10 border border-opacity-10 rounded ${
-              row.valid
+              row.valida
                 ? "text-success bg-success border-success"
                 : "text-warning bg-warning border-warning"
             }`}
@@ -152,15 +157,11 @@ const BookingsByUser = () => {
       if (result.isConfirmed) {
         deleteBookingMutation.mutate(id, {
           onSuccess: () => {
-            Swal.fire(
-              "¡Eliminada!",
-              "La reserva ha sido eliminada.",
-              "success"
-            );
+            Swal.fire("¡Eliminada!", "La reserva fue eliminada.", "success");
           },
           onError: (err) => {
-            console.error(err);
-            Swal.fire("Error", "No se ha podido eliminar la reserva.", "error");
+            console.error("Error al eliminar la reserva", err);
+            Swal.fire("Error", "No se pudo eliminar la reserva.", "error");
           },
         });
       }

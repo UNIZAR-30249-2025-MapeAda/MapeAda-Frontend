@@ -1,5 +1,5 @@
 import React from "react";
-import { formatDate, formatDuration } from "../../../utils/format";
+import { formatDuration } from "../../../utils/format";
 
 interface SummaryStepProps {
   espacios: string[];
@@ -27,17 +27,17 @@ const SummaryStep: React.FC<SummaryStepProps> = ({
           <strong>Espacios reservados:</strong> {espacios.join(", ")}
         </p>
         <p>
-          <strong>Fecha:</strong> {formatDate(fecha) || "No seleccionada"}
+          <strong>Fecha:</strong> {fecha}
         </p>
         <p>
           <strong>Duración:</strong>{" "}
-          {formatDuration(duracion) || "No especificada"}
+          {formatDuration(duracion)}
         </p>
         <p>
-          <strong>Tipo de uso:</strong> {uso || "No ingresados"}
+          <strong>Tipo de uso:</strong> {uso}
         </p>
         <p>
-          <strong>Número de asistentes:</strong> {asistentes || "No ingresados"}
+          <strong>Número de asistentes:</strong> {asistentes}
         </p>
         <p>
           <strong>Detalles adicionales:</strong> {detallesAdicionales || "-"}

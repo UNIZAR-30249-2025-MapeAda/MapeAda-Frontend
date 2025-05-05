@@ -53,7 +53,10 @@ export const UserMenu: FC<UserMenuProps> = ({ className = "" }) => {
         </div>
         <span className="fs-5 fw-bold">¡Hola {user.data?.username}!</span>
         <div className="bg-white rounded mt-3">
-          <Link to={paths.app.bookings.user.getHref("1")} className="btn pt-3">
+          <Link
+            to={paths.app.bookings.user.getHref(user.data!.nip)}
+            className="btn pt-3"
+          >
             <FontAwesomeIcon icon={faBookmark} className="me-3" />
             <span>Mis Reservas</span>
           </Link>

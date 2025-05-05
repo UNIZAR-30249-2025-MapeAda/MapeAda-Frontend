@@ -11,6 +11,7 @@ import { LoadingIndicator } from "../../../components/ui/loading-indicator";
 import { ErrorMessage } from "../../../components/errors/error-message";
 import { useGetSpacesByFloor } from "../../../features/spaces/api/get-spaces-by-floor";
 import SpaceLegend from "../../../features/spaces/components/space-leyend";
+import { SpaceCategory } from "../../../features/spaces/types/enums";
 
 function Landing() {
   const [floor, setFloor] = useState(0);
@@ -20,7 +21,13 @@ function Landing() {
   const [showSpaceDetailsModal, setShowSpaceDetailsModal] = useState(false);
   const { data: spaces, isLoading, error } = useGetSpacesByFloor(floor);
   const [selectedSpaces, setSelectedSpaces] = useState<Space[]>([]);
-  const selectedSpaceNames = useMemo(() => selectedSpaces.map((s) => s.name), [selectedSpaces]);
+  const selectedSpaceNames = useMemo(
+    () => selectedSpaces.map((s) => s.nombre),
+    [selectedSpaces]
+  );
+  const [searchText, setSearchText] = useState("");
+  const [category, setCategory] = useState<SpaceCategory | undefined>();
+  const [minCapacity, setMinCapacity] = useState<number | undefined>();
 
   const removeSpaceFromBookingList = (index: number) => {
     setSelectedSpaces((prev) => {
@@ -45,17 +52,18 @@ function Landing() {
     const props = feature.properties;
     const space: Space = {
       id: String(feature.id),
-      name: props!.nombre,
-      dimension: props!.tamanyo,
-      type: props!.tipo,
-      category: props!.categoria,
-      floor: props!.planta,
-      capacity: props!.capacidad,
+      nombre: props!.nombre,
+      tamanyo: props!.tamanyo,
+      tipo: props!.tipo,
+      categoria: props!.categoria,
+      planta: props!.planta,
+      capacidad: props!.capacidad,
       reservable: props!.reservable,
-      startTime: props!.hora_inicio,
-      endTime: props!.hora_fin,
-      ownerType: props!.tipo_propietario,
-      ownerId: props!.propietario_id,
+      horario: {
+        inicio: props?.hora_inicio,
+        fin: props?.hora_fin,
+      },
+      propietarios: [],
     };
     setCurrentSpace(space);
     setShowSpaceDetailsModal(true);
@@ -75,7 +83,14 @@ function Landing() {
 
   return (
     <>
-      <Navbar />
+      <Navbar
+        searchText={searchText}
+        setSearchText={setSearchText}
+        category={category}
+        setCategory={setCategory}
+        minCapacity={minCapacity}
+        setMinCapacity={setMinCapacity}
+      />
       <FloorSelector floor={floor} setFloor={setFloor} />
       <SpaceLegend />
       <BookingList

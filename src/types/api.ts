@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Role } from "../config/constants";
+import { BookingUsage } from "../features/bookings/types/enums";
+import { SpaceCategory } from "../features/spaces/types/enums";
 
 export type LoginResponse = {
   user: { nip: string; username: string; email: string; role: Role };
@@ -12,72 +15,91 @@ export type MeResponse = {
   role: Role;
 };
 
-interface Intervalo {
-  startTime: string;
-  endTime: string;
-}
+type Intervalo = {
+  inicio: string;
+  fin: string;
+};
 
-export type GetAllBookingsResponse = {
+export type BookingResponse = {
   id: number;
-  userNip: string;
-  spaces: string[];
-  date: Date;
-  schedule: Intervalo;
-  assistants: number;
-  usage: number;
-  details?: string;
-  valid: boolean;
+  espacios: string[];
+  usuario: string;
+  uso: BookingUsage;
+  asistentes: number;
+  periodo: Intervalo;
+  observaciones?: string;
+  valida: boolean;
+  invalidSince?: string;
+  deletedAt?: string;
 };
 
-export type GetBookingsByUserResponse = {
-  id: number;
-  userNip: string;
-  spaces: string[];
-  date: Date;
-  schedule: Intervalo;
-  assistants: number;
-  usage: number;
-  details?: string;
-  valid: boolean;
+export type GetAllBookingsResponse = BookingResponse[];
+
+export type GetBookingsByUserResponse = BookingResponse[];
+
+export type GetBookingsBySpaceResponse = BookingResponse[];
+
+type JsonPatchOp =
+  | { op: "add" | "remove" | "replace"; path: string; value?: any }
+  | { op: "copy" | "move" | "test"; from: string; path: string; value?: any };
+
+export type PatchBookingRequest = JsonPatchOp[];
+
+export type PostBookingRequest = {
+  nip: string;
+  espacios: string[];
+  uso: number;
+  asistentes: number;
+  periodo: Intervalo;
+  observaciones?: string;
 };
 
-export type GetBookingsBySpaceResponse = {
-  id: number;
-  userNip: string;
-  spaces: string[];
-  date: Date;
-  schedule: Intervalo;
-  assistants: number;
-  usage: number;
-  details?: string;
-  valid: boolean;
-};
-
-export type PatchBookingRequest = {
-  valid: boolean;
-};
-
-interface Schedule {
+type Schedule = {
   date: Date;
   isHoliday: boolean;
   schedule?: Intervalo;
-}
+};
 
-interface DefaultCalendar {
-  week: boolean[]; // 0=Monday ... 6=Sunday
-  schedule: Intervalo;
-}
+type Porcentaje = {
+  valor: number;
+};
 
-interface Porcentaje {
-  value: number;
-}
+type Calendar = {
+  horariosApertura: Schedule[];
+  intervaloPorDefecto: Intervalo;
+  diasPorDefecto: number;
+};
 
-interface Calendar {
-  default: DefaultCalendar;
-  restrictions: Schedule[];
-}
+export type GetBuildingResponse = {
+  porcentajeUsoMaximo: Porcentaje;
+  calendarioApertura: Calendar;
+};
 
-export interface GetBuildingResponse {
-  maxUse: Porcentaje;
-  calendar: Calendar;
-}
+type Propietarios = {
+  tipo: number;
+  id: string;
+};
+
+type SpaceResponse = {
+  id: string;
+  tamanyo: DoubleRange;
+  nombre: string;
+  tipo: SpaceCategory;
+  capacidad: number;
+  planta: number;
+  reservable: boolean;
+  categoria: SpaceCategory;
+  horario: Intervalo;
+  propietarios: Propietarios[];
+};
+
+export type GetSpaceByIdResponse = SpaceResponse;
+
+export type GetSpacesByFiltersParams = {
+  nombre?: string;
+  categoria?: number;
+  capacidadMaxima?: number;
+  planta?: string;
+};
+
+export type PatchSpaceRequest = JsonPatchOp[];

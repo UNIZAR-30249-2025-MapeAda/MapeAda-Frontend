@@ -11,6 +11,7 @@ import Landing from "./routes/app/landing";
 import AllBookings from "./routes/app/all-bookings";
 import BookingsByUser from "./routes/app/bookings-by-user";
 import { ProtectedRoute } from "../components/protected-route";
+import EditSpace from "./routes/app/edit-space";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convert = (queryClient: QueryClient) => (module: any) => {
@@ -71,6 +72,16 @@ const createAppRouter = (queryClient: QueryClient) =>
           ),
           lazy: () =>
             import("./routes/app/bookings-by-user").then(convert(queryClient)),
+        },
+        {
+          path: paths.app.spaces.path,
+          element: (
+            <ProtectedRoute allowedRoles={paths.app.bookings.user.allowedRoles}>
+              <EditSpace />
+            </ProtectedRoute>
+          ),
+          lazy: () =>
+            import("./routes/app/edit-space").then(convert(queryClient)),
         },
       ],
     },

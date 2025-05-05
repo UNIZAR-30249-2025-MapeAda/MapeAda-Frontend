@@ -38,8 +38,8 @@ const DurationStep: React.FC<DurationStepProps> = ({
       endMin = Math.min(...ends);
     } else {
       // horario por defecto del edificio
-      startMin = parseMinutes(building.calendar.default.schedule.startTime);
-      endMin = parseMinutes(building.calendar.default.schedule.endTime);
+      startMin = parseMinutes(building.calendarioApertura.intervaloPorDefecto.inicio);
+      endMin = parseMinutes(building.calendarioApertura.intervaloPorDefecto.fin);
     }
 
     const generated: string[] = [];
@@ -49,10 +49,10 @@ const DurationStep: React.FC<DurationStepProps> = ({
     setSlots(generated);
 
     const bookingRanges = bookings
-      .filter((b) => b.startTime)
+      .filter((b) => b.periodo.inicio)
       .map((b) => ({
-        start: parseMinutes(b.startTime),
-        end: parseMinutes(b.endTime),
+        start: parseMinutes(b.periodo.inicio),
+        end: parseMinutes(b.periodo.fin),
       }));
 
     const filtered = selected.filter((h) => {
@@ -68,10 +68,10 @@ const DurationStep: React.FC<DurationStepProps> = ({
 
   const toggle = (hour: string) => {
     const bookingRanges = bookings
-      .filter((b) => b.startTime)
+      .filter((b) => b.periodo.inicio)
       .map((b) => ({
-        start: parseMinutes(b.startTime),
-        end: parseMinutes(b.endTime),
+        start: parseMinutes(b.periodo.inicio),
+        end: parseMinutes(b.periodo.fin),
       }));
     const m = parseMinutes(hour);
     if (bookingRanges.some((r) => m >= r.start && m < r.end)) return;
@@ -111,10 +111,10 @@ const DurationStep: React.FC<DurationStepProps> = ({
   }
 
   const bookingRanges = bookings
-    .filter((b) => b.startTime)
+    .filter((b) => b.periodo.inicio)
     .map((b) => ({
-      start: parseMinutes(b.startTime),
-      end: parseMinutes(b.endTime),
+      start: parseMinutes(b.periodo.inicio),
+      end: parseMinutes(b.periodo.fin),
     }));
 
   return (

@@ -1,34 +1,56 @@
-import {
-  GetAllBookingsResponse,
-  GetBookingsBySpaceResponse,
-  GetBookingsByUserResponse,
-} from "../../../types/api";
-import { bookingUsages } from "../types/enums";
+import { BookingResponse } from "../../../types/api";
 import { Booking } from "../types/models";
 
 export const mapGetAllBookingsResponseToBooking = (
-  dto: GetAllBookingsResponse
+  res: BookingResponse
 ): Booking => ({
-  ...dto,
-  startTime: dto.schedule.startTime,
-  endTime: dto.schedule.endTime,
-  usage: bookingUsages[dto.usage],
+  id: res.id,
+  espacios: res.espacios,
+  usuario: res.usuario,
+  uso: res.uso,
+  asistentes: res.asistentes,
+  periodo: {
+    inicio: res.periodo.inicio,
+    fin: res.periodo.fin,
+  },
+  observaciones: res.observaciones,
+  valida: res.valida,
+  invalidSince: res.invalidSince,
+  deletedAt: res.deletedAt,
 });
 
 export const mapGetBookingsByUserResponseToBooking = (
-  dto: GetBookingsByUserResponse
+  res: BookingResponse
 ): Booking => ({
-  ...dto,
-  startTime: dto.schedule.startTime,
-  endTime: dto.schedule.endTime,
-  usage: bookingUsages[dto.usage],
+  id: res.id,
+  espacios: res.espacios,
+  usuario: res.usuario,
+  uso: res.uso,
+  asistentes: res.asistentes,
+  periodo: {
+    inicio: res.periodo.inicio,
+    fin: res.periodo.fin,
+  },
+  observaciones: res.observaciones,
+  valida: res.valida,
+  invalidSince: res.invalidSince,
+  deletedAt: res.deletedAt,
 });
 
 export const mapGetBookingsBySpaceResponseToBooking = (
-  dto: GetBookingsBySpaceResponse
+  res: BookingResponse
 ): Booking => ({
-  ...dto,
-  startTime: dto.schedule.startTime,
-  endTime: dto.schedule.endTime,
-  usage: bookingUsages[dto.usage],
+  id: res.id,
+  espacios: res.espacios,
+  usuario: res.usuario,
+  uso: res.uso,
+  asistentes: res.asistentes,
+  periodo: {
+    inicio: res.periodo.inicio,
+    fin: res.periodo.fin,
+  },
+  observaciones: res.observaciones,
+  valida: res.valida,
+  invalidSince: res.invalidSince,
+  deletedAt: res.deletedAt,
 });

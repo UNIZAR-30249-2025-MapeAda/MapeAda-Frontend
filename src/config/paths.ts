@@ -45,5 +45,10 @@ export const paths = {
         allowedRoles: ALL_ROLES,
       },
     },
+    spaces: {
+      path: "spaces/:spaceId",
+      getHref: (spaceId: string) => `/app/spaces/${spaceId}`,
+      allowedRoles: ADMIN_ROLE,
+    }
   },
 } as const;

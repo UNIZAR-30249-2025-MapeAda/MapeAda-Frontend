@@ -11,7 +11,7 @@ const getUser = async (): Promise<MeResponse> => {
   */
 
   return {
-    nip: "000000",
+    nip: "840091",
     email: "admin@example.com",
     username: "MockedAdmin",
     role: ADMIN_ROLE,

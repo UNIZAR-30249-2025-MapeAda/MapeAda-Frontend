@@ -1,41 +1,10 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { Building } from "../types/models";
 import { GetBuildingResponse } from "../../../types/api";
-
-const mockSchedule: Building = {
-  maxUse: {
-    value: 90,
-  },
-  calendar: {
-    default: {
-      week: [true, true, true, true, true, false, false],
-      schedule: {
-        startTime: "8:00",
-        endTime: "22:00",
-      },
-    },
-    restrictions: [
-      {
-        date: new Date(),
-        isHoliday: false,
-        schedule: {
-          startTime: "8:00",
-          endTime: "18:00",
-        },
-      },
-      {
-        date: new Date(2025, 4, 12),
-        isHoliday: true,
-      },
-    ],
-  },
-};
+import { api } from "../../../lib/api-client";
 
 const getBuilding = async (): Promise<Building> => {
-  // const calendar: GetBuildingResponse = await api.get("/api/building");
-  const calendar = await new Promise<GetBuildingResponse>((resolve) =>
-    setTimeout(() => resolve(mockSchedule), 500)
-  );
+  const calendar: GetBuildingResponse = await api.get("/api/building");
 
   return calendar;
 };

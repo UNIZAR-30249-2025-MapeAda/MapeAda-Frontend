@@ -5,6 +5,12 @@ import { spaceCategories } from "../types/enums";
 import { ErrorMessage } from "../../../components/errors/error-message";
 import { LoadingIndicator } from "../../../components/ui/loading-indicator";
 import { useGetBuilding } from "../../building/api/get-buiding";
+import { Building } from "../../building/types/models";
+import { useUser } from "../../../lib/auth";
+import { ADMIN_ROLE } from "../../../config/constants";
+import { Link } from "react-router";
+import { paths } from "../../../config/paths";
+import { formatHM } from "../../../utils/format";
 
 export interface SpaceDetailsModalProps {
   space: Space;
@@ -19,7 +25,8 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
   handleClose,
   handleBookSpace,
 }) => {
-  const shouldFetchSchedule = space.startTime === null;
+  const user = useUser();
+  const shouldFetchSchedule = space.horario.inicio === undefined;
   const {
     data: building,
     isLoading,
@@ -29,27 +36,36 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
     enabled: shouldFetchSchedule,
   });
 
-  const getScheduleForToday = (space: Space): string => {
-    if (space.startTime) {
-      return `${space.startTime} - ${space.endTime}`;
+  const getBuildingScheduleForToday = (building?: Building): string => {
+    const today = new Date();
+    const dayOfWeek = (today.getDay() + 6) % 7; // 0 = Monday ... 6 = Sunday
+
+    const { diasPorDefecto, horariosApertura } = building!.calendarioApertura;
+
+    const mask = 1 << dayOfWeek;
+    const isDefaultWorkday = (diasPorDefecto & mask) !== 0;
+
+    const override = horariosApertura.find(
+      (r) => new Date(r.date).toDateString() === today.toDateString()
+    );
+
+    if (override) {
+      if (override.isHoliday) {
+        return "Día festivo";
+      }
+      if (override.schedule) {
+        const { inicio, fin } = override.schedule;
+        return `${formatHM(inicio)} - ${formatHM(fin)}`;
+      }
     }
 
-    const today = new Date();
-    const dayOfWeek = (today.getDay() + 6) % 7; // Convierte 0=Sunday...6=Saturday a 0=Monday...6=Sunday
-
-    const isHoliday =
-      !building?.calendar.default.week[dayOfWeek] ||
-      building?.calendar.restrictions.some(
-        (r) =>
-          new Date(r.date).toDateString() === today.toDateString() &&
-          r.isHoliday
-      );
-
-    if (isHoliday) {
+    if (!isDefaultWorkday) {
       return "Día festivo";
     }
 
-    return `${building?.calendar.default.schedule.startTime} - ${building?.calendar.default.schedule.endTime}`;
+    const { inicio: defInicio, fin: defFin } =
+      building!.calendarioApertura.intervaloPorDefecto;
+    return `${formatHM(defInicio)} - ${formatHM(defFin)}`;
   };
 
   if (isLoading) {
@@ -58,11 +74,15 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
     );
   }
 
-  if (error) {
+  if (error || !building) {
     return (
       <ErrorMessage message="Error al obtener el horario del Ada Byron." />
     );
   }
+
+  const scheduleToday = shouldFetchSchedule
+    ? getBuildingScheduleForToday(building)
+    : `${space.horario.inicio} - ${space.horario.fin}`;
 
   return (
     <Modal
@@ -75,7 +95,7 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
     >
       <Modal.Header closeButton />
       <Modal.Body className="text-center mx-4" style={{ height: "500px" }}>
-        <h1>{space.name}</h1>
+        <h1>{space.nombre}</h1>
         <div className="d-flex">
           <div className="col-3"></div>
           <div className="d-flex flex-column text-start p-4 gap-3 col">
@@ -89,27 +109,23 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
             </div>
             <div>
               <strong>Tipo: </strong>
-              <span>{spaceCategories[Number(space.type)]}</span>
+              <span>{spaceCategories[Number(space.tipo)]}</span>
             </div>
             <div>
               <strong>Categoría: </strong>
-              <span>{spaceCategories[Number(space.category)]}</span>
+              <span>{spaceCategories[Number(space.categoria)]}</span>
             </div>
             <div>
               <strong>Planta: </strong>
-              <span>{space.floor}</span>
+              <span>{space.planta}</span>
             </div>
             <div>
               <strong>Número máximo de ocupantes: </strong>
-              <span>{space.capacity}</span>
+              <span>{space.capacidad}</span>
             </div>
             <div>
-              <strong>Propietario: </strong>
-              <span>{space.ownerId}</span>
-            </div>
-            <div>
-              <strong>Horario: </strong>
-              <span>{getScheduleForToday(space)}</span>
+              <strong>Horario de hoy: </strong>
+              <span>{scheduleToday}</span>
             </div>
           </div>
           <div className="col-2"></div>
@@ -124,6 +140,14 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
         >
           Añadir a la reserva
         </button>
+        {user.data?.role == ADMIN_ROLE && (
+          <Link
+            to={paths.app.spaces.getHref(space.id)}
+            className="btn btn-warning px-3"
+          >
+            <span>Editar</span>
+          </Link>
+        )}
       </Modal.Footer>
     </Modal>
   );

@@ -1,9 +1,3 @@
-export const formatDate = (fechaISO: string) => {
-  if (!fechaISO) return "No seleccionada";
-  const [year, month, day] = fechaISO.split("-");
-  return `${day}/${month}/${year}`;
-};
-
 export const formatDuration = (duracionRaw: string) => {
   if (!duracionRaw) return "No especificada";
 
@@ -33,3 +27,5 @@ export const formatMinutes = (total: number) => {
   const m = (total % 60).toString().padStart(2, "0");
   return `${h}:${m}`;
 };
+
+export const formatHM = (time: string) => time.slice(0, 5);

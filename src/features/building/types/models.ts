@@ -1,29 +1,25 @@
-interface Intervalo {
-  startTime: string;
-  endTime: string;
-}
+type Intervalo = {
+  inicio: string;
+  fin: string;
+};
 
-interface Schedule {
+type Schedule = {
   date: Date;
   isHoliday: boolean;
   schedule?: Intervalo;
-}
+};
 
-interface DefaultCalendar {
-  week: boolean[]; // 0=Monday ... 6=Sunday
-  schedule: Intervalo;
-}
+type Porcentaje = {
+  valor: number;
+};
 
-interface Porcentaje {
-  value: number;
-}
+type Calendar = {
+  horariosApertura: Schedule[];
+  intervaloPorDefecto: Intervalo;
+  diasPorDefecto: number;
+};
 
-interface Calendar {
-  default: DefaultCalendar;
-  restrictions: Schedule[];
-}
-
-export interface Building {
-  maxUse: Porcentaje;
-  calendar: Calendar;
-}
+export type Building = {
+  porcentajeUsoMaximo: Porcentaje;
+  calendarioApertura: Calendar;
+};
