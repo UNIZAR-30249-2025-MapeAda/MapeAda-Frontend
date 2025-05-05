@@ -1,9 +1,27 @@
 import axios, { InternalAxiosRequestConfig } from "axios";
 import { paths } from "../config/paths";
 
+
+/**********************
+ PyGeoAPI
+ ********************+*/
+export const apiPygeoapi = axios.create({
+  baseURL: import.meta.env.VITE_PYGEOAPI_URL,
+});
+
+apiPygeoapi.interceptors.response.use((res) => res.data);
+
+/**********************
+ API
+ *********************/
 function authRequestInterceptor(config: InternalAxiosRequestConfig) {
-  if (config.headers) {
-    config.headers.Accept = "application/json";
+  config.headers = config.headers ?? {};
+
+  config.headers.Accept = "application/json";
+
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
@@ -12,12 +30,6 @@ function authRequestInterceptor(config: InternalAxiosRequestConfig) {
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
-
-export const apiPygeoapi = axios.create({
-  baseURL: import.meta.env.VITE_PYGEOAPI_URL,
-});
-
-apiPygeoapi.interceptors.response.use((res) => res.data);
 
 api.interceptors.request.use(authRequestInterceptor);
 api.interceptors.response.use(

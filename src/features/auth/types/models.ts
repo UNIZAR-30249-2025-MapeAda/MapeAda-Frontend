@@ -1,9 +1,11 @@
-import { Role } from "../../../config/constants";
+import { Departamento, Rol } from "./enums";
 
 export type User = {
-  nip: string;
-  username: string;
-  email: string;
-  role: Role;
-  token: string;
+  nombre: string; 
+  apellidos: string; 
+  telefono: string; 
+  nip: string; 
+  email: string; 
+  role: Rol;
+  departamento: Departamento | null;
 };

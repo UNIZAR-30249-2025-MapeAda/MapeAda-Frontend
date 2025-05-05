@@ -1,19 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Role } from "../config/constants";
+import { User } from "../features/auth/types/models";
 import { BookingUsage } from "../features/bookings/types/enums";
 import { SpaceCategory } from "../features/spaces/types/enums";
 
 export type LoginResponse = {
-  user: { nip: string; username: string; email: string; role: Role };
+  usuario: User;
   token: string;
 };
 
-export type MeResponse = {
-  nip: string;
-  username: string;
+export type LoginRequest = {
   email: string;
-  role: Role;
-};
+}
 
 type Intervalo = {
   inicio: string;
