@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { GetBookingsByUserResponse as GetBookingsBySpaceResponse } from "../../../types/api";
 import { Booking } from "../types/models";
-import { mapGetBookingsBySpaceResponseToBooking } from "../utils/mappers";
 import { api } from "../../../lib/api-client";
 
 const getBookingsBySpace = async (id: string): Promise<Booking[]> => {
   const bookings: GetBookingsBySpaceResponse = await api.get(`/api/bookings/space/${id}`);
 
-  return bookings.map(mapGetBookingsBySpaceResponseToBooking);
+  return bookings;
 };
 
 export const getBookingsBySpaceQuery = (id: string) => ({

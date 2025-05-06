@@ -1,6 +1,6 @@
 export const CAMPUS_COORDS: [number, number] = [41.6834, -0.8885];
 
-export const CATEGORY_COLORS: Record<number, string> = {
+export const SPACE_TYPE_COLORS: Record<number, string> = {
   0: "#e41a1c", // Laboratorio: rojo
   1: "#377eb8", // Despacho: azul
   2: "#4daf4a", // Aula: verde

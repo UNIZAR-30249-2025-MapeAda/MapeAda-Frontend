@@ -1,6 +1,6 @@
 import React from "react";
-import { spaceCategories } from "../types/enums";
-import { CATEGORY_COLORS } from "../../../config/constants";
+import { spaceTypes } from "../types/enums";
+import { SPACE_TYPE_COLORS } from "../../../config/constants";
 
 const SpaceLegend: React.FC = () => {
   return (
@@ -9,7 +9,7 @@ const SpaceLegend: React.FC = () => {
         style={{ zIndex: 10000 }}
       >
         <strong className="mb-2">Leyenda de espacios</strong>
-      {spaceCategories.map((category, idx) => (
+      {spaceTypes.map((category, idx) => (
         <div key={category} className="d-flex align-items-center mb-1">
           <span
             className="me-2"
@@ -17,7 +17,7 @@ const SpaceLegend: React.FC = () => {
               display: 'inline-block',
               width: '12px',
               height: '12px',
-              backgroundColor: CATEGORY_COLORS[idx],
+              backgroundColor: SPACE_TYPE_COLORS[idx],
               borderRadius: '2px',
             }}
           />

@@ -12,36 +12,39 @@ import { ErrorMessage } from "../../../components/errors/error-message";
 import { useGetSpaces } from "../../../features/spaces/api/get-spaces";
 import SpaceLegend from "../../../features/spaces/components/space-leyend";
 import {
-  spaceCategories,
-  SpaceCategory,
+  SpaceType,
+  spaceTypes,
 } from "../../../features/spaces/types/enums";
 import emitter from "../../../utils/emitter";
-import { useGetAllBookings } from "../../../features/bookings/api/get-all-bookings";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router";
 import { paths } from "../../../config/paths";
 import { useUser } from "../../../lib/auth";
+import { useGetBookingsByUser } from "../../../features/bookings/api/get-bookings-by-user";
 
 function Landing() {
+  const user = useUser();
   const {
     data: bookings = [],
     isLoading: isLoadingBookings,
     error: errorBookings,
-  } = useGetAllBookings();
+  } = useGetBookingsByUser(user.data!.nip);
   const [floor, setFloor] = useState(0);
   const [showBookModal, setShowBookModal] = useState(false);
   const [showBookingList, setShowBookingList] = useState(false);
   const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
   const [showSpaceDetailsModal, setShowSpaceDetailsModal] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [category, setCategory] = useState<SpaceCategory | undefined>();
+  const [category, setCategory] = useState<SpaceType | undefined>();
   const [minCapacity, setMinCapacity] = useState<number | undefined>();
-  const user = useUser();
+  const [alertDismissed, setAlertDismissed] = useState<boolean>(() =>
+    sessionStorage.getItem("bookingAlertDismissed") === "true"
+  );
   const filters = useMemo(
     () => ({
       planta: floor.toString(),
       nombre: searchText || undefined,
-      categoria: category ? spaceCategories.indexOf(category) : undefined,
+      categoria: category ? spaceTypes.indexOf(category) : undefined,
       capacidadMaxima: minCapacity,
     }),
     [floor, searchText, category, minCapacity]
@@ -66,25 +69,38 @@ function Landing() {
   }, []);
 
   useEffect(() => {
-    if (bookings.length > 0) {
-      const deletedAndInvalidBookings = bookings.filter(
-        (b) => !b.deletedAt || !b.valida || !b.invalidSince
-      );
-      if (deletedAndInvalidBookings.length > 0) {
-        Swal.fire({
-          title: "¡Atención!",
-          text: "Tienes reservas potencialmente inválidas y/o eliminadas",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Ir a mis reservas",
-          cancelButtonText: "Revisar más tarde",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            navigate(paths.app.bookings.user.getHref(user.data!.nip));
-          }
-        });
-      }
+    if (alertDismissed || bookings.length === 0) return;
+
+    const invalid = bookings.filter(b => !b.valida || b.invalidSince);
+    const deletedByOthers = bookings.filter(
+      b => b.deletedAt && (!b.deletedBy || b.deletedBy !== user.data!.nip)
+    );
+    if (invalid.length === 0 && deletedByOthers.length === 0) return;
+
+    let text = "";
+    if (invalid.length > 0) {
+      text += `Tienes ${invalid.length} reserva(s) potencialmente inválida(s).\n`;
     }
+    if (deletedByOthers.length > 0) {
+      text += `Tienes ${deletedByOthers.length} reserva(s) eliminada(s) por otro(s) gerente(s) y/o el sistema.`;
+    }
+
+    Swal.fire({
+      title: "¡Atención!",
+      text,
+      icon: "warning",
+      showConfirmButton: true,
+      showCancelButton: true,
+      confirmButtonText: "Ir a mis reservas",
+      cancelButtonText: "Revisar más tarde",
+      showCloseButton: true,
+    }).then(result => {
+      sessionStorage.setItem("bookingAlertDismissed", "true");
+      setAlertDismissed(true);
+      if (result.isConfirmed) {
+        navigate(paths.app.bookings.user.getHref(user.data!.nip));
+      }
+    });
   }, [bookings]);
 
   const removeSpaceFromBookingList = (index: number) => {
@@ -141,9 +157,7 @@ function Landing() {
 
   if (errorBookings) {
     return (
-      <ErrorMessage
-        message={"Error obteniendo las reservas del usuario."}
-      />
+      <ErrorMessage message={"Error obteniendo las reservas del usuario."} />
     );
   }
 

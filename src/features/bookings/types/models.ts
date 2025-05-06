@@ -16,4 +16,5 @@ export type Booking = {
   valida: boolean;
   invalidSince?: string;
   deletedAt?: string;
+  deletedBy?: string;
 };

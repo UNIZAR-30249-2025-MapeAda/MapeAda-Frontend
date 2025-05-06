@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal } from "react-bootstrap";
 import { Space } from "../types/models";
-import { spaceCategories } from "../types/enums";
+import { spaceTypes } from "../types/enums";
 import { ErrorMessage } from "../../../components/errors/error-message";
 import { LoadingIndicator } from "../../../components/ui/loading-indicator";
 import { useGetBuilding } from "../../building/api/get-buiding";
@@ -109,11 +109,11 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
             </div>
             <div>
               <strong>Tipo: </strong>
-              <span>{spaceCategories[Number(space.tipo)]}</span>
+              <span>{spaceTypes[Number(space.tipo)]}</span>
             </div>
             <div>
               <strong>Categoría: </strong>
-              <span>{spaceCategories[Number(space.categoria)]}</span>
+              <span>{spaceTypes[Number(space.categoria)]}</span>
             </div>
             <div>
               <strong>Planta: </strong>

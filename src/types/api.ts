@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "../features/auth/types/models";
 import { BookingUsage } from "../features/bookings/types/enums";
-import { SpaceCategory } from "../features/spaces/types/enums";
+import { SpaceType } from "../features/spaces/types/enums";
 
 export type LoginResponse = {
   usuario: User;
@@ -28,6 +28,7 @@ export type BookingResponse = {
   valida: boolean;
   invalidSince?: string;
   deletedAt?: string;
+  deletedBy?: string;
 };
 
 export type GetAllBookingsResponse = BookingResponse[];
@@ -81,11 +82,11 @@ type SpaceResponse = {
   id: string;
   tamanyo: DoubleRange;
   nombre: string;
-  tipo: SpaceCategory;
+  tipo: SpaceType;
   capacidad: number;
   planta: number;
   reservable: boolean;
-  categoria: SpaceCategory;
+  categoria: SpaceType;
   horario: Intervalo;
   propietarios: Propietarios[];
 };

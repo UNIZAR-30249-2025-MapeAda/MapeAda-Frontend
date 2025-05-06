@@ -3,15 +3,15 @@ import { Select } from "./select";
 import { UserMenu } from "./user-menu";
 import SearchBar from "./search-bar";
 import {
-  spaceCategories,
-  SpaceCategory,
+  spaceTypes,
+  SpaceType,
 } from "../../features/spaces/types/enums";
 
 type NavBarProps = {
   searchText: string;
   setSearchText: (text: string) => void;
-  category?: SpaceCategory;
-  setCategory: (category?: SpaceCategory) => void;
+  category?: SpaceType;
+  setCategory: (category?: SpaceType) => void;
   minCapacity?: number;
   setMinCapacity: (value?: number) => void;
 };
@@ -32,7 +32,7 @@ export const Navbar: FC<NavBarProps> = ({
     if (category === "categoria") {
       setCategory(undefined);
     } else {
-      setCategory(category as SpaceCategory);
+      setCategory(category as SpaceType);
     }
   };
 
@@ -59,7 +59,7 @@ export const Navbar: FC<NavBarProps> = ({
         <Select
           options={[
             { value: "categoria", label: "Categoría" },
-            ...spaceCategories.map((status) => ({
+            ...spaceTypes.map((status) => ({
               value: status,
               label: status,
             })),

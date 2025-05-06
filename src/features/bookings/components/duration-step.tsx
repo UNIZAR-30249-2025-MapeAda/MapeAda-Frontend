@@ -22,8 +22,6 @@ const DurationStep: React.FC<DurationStepProps> = ({
   bookings,
   building,
 }) => {
-  console.log(bookings);
-
   const [slots, setSlots] = useState<string[]>([]);
   const [selected, setSelected] = useState<string[]>(
     duracion ? duracion.split(",") : []

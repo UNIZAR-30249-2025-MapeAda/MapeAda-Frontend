@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Intervalo, Propietarios, Space } from "../types/models";
-import { spaceCategories } from "../types/enums";
+import { spaceTypes } from "../types/enums";
 import { Select } from "../../../components/ui/select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -288,7 +288,7 @@ const EditSpaceForm: React.FC<EditSpaceFormProps> = ({
       </div>
       <div className="mb-3">
         <strong>Tipo: </strong>
-        <span>{spaceCategories[Number(space!.tipo)]}</span>
+        <span>{spaceTypes[Number(space!.tipo)]}</span>
       </div>
       <div className="mb-3">
         <strong>Planta: </strong>
@@ -317,7 +317,7 @@ const EditSpaceForm: React.FC<EditSpaceFormProps> = ({
         <strong>Categoría: </strong>
         <Select
           options={[
-            ...spaceCategories.map((label, idx) => ({
+            ...spaceTypes.map((label, idx) => ({
               value: String(idx),
               label,
             })),

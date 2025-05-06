@@ -1,4 +1,4 @@
-export const spaceCategories = [
+export const spaceTypes = [
   "Laboratorio",
   "Despacho",
   "Aula",
@@ -8,4 +8,4 @@ export const spaceCategories = [
   "Sala de reunión",
   "Sala informática",
 ] as const;
-export type SpaceCategory = (typeof spaceCategories)[number];
+export type SpaceType = (typeof spaceTypes)[number];

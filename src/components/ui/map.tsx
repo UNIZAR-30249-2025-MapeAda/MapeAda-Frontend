@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import type { Feature, FeatureCollection } from "geojson";
-import { CAMPUS_COORDS, CATEGORY_COLORS } from "../../config/constants";
+import { CAMPUS_COORDS, SPACE_TYPE_COLORS } from "../../config/constants";
 import { useRef, useEffect } from "react";
 
 interface MapProps {
@@ -25,10 +25,10 @@ export const Map: React.FC<MapProps> = ({
 
   function getStyle(feature?: Feature): L.PathOptions {
     const props = feature!.properties;
-    const catIndex: number = props!.categoria;
+    const catIndex: number = props!.tipo;
     const isReservable: boolean = props!.reservable;
     const isSelected: boolean = selectedSpaces.includes(String(feature!.id));
-    const fillColor = CATEGORY_COLORS[catIndex] ?? "#cccccc";
+    const fillColor = SPACE_TYPE_COLORS[catIndex] ?? "#cccccc";
 
     return {
       fillColor,

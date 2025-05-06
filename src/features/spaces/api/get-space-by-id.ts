@@ -11,8 +11,8 @@ const getSpaceById = async (id: string): Promise<Space> => {
 
 export const useGetSpaceById = (id: string) => {
   return useQuery<Space, Error>({
-    queryKey: ["space", ],
+    queryKey: ["space", id],
     queryFn: () => getSpaceById(id),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 };

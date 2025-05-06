@@ -1,4 +1,4 @@
-import { SpaceCategory } from "./enums";
+import { SpaceType } from "./enums";
 
 export type Intervalo = {
   inicio: string;
@@ -14,8 +14,8 @@ export type Space = {
   id: string;
   nombre: string;
   tamanyo: DoubleRange;
-  tipo: SpaceCategory;
-  categoria: SpaceCategory;
+  tipo: SpaceType;
+  categoria: SpaceType;
   planta: number;
   capacidad: number;
   reservable: boolean;
