@@ -13,7 +13,7 @@ export const useGetBuilding = (options?: UseQueryOptions<Building, Error>) => {
   return useQuery<Building, Error>({
     queryKey: ["building"],
     queryFn: getBuilding,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
     ...options,
   });
 };

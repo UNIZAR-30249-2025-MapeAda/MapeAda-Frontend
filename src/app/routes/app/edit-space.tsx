@@ -67,6 +67,7 @@ const EditSpace = () => {
     } catch (err) {
       showApiError(err);
     }
+    navigate(paths.app.dashboard.getHref());
   };
 
   if (isLoading) {

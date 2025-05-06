@@ -13,7 +13,7 @@ import { ErrorMessage } from "../../../components/errors/error-message";
 import { getBookingsBySpaceQuery } from "../api/get-bookings-by-space";
 import { useQueries } from "@tanstack/react-query";
 import { Booking } from "../types/models";
-import { useGetBuilding } from "../../building/api/get-buiding";
+import { useGetBuilding } from "../../building/api/get-building";
 import { Space } from "../../spaces/types/models";
 import { addHours, formatISO, parse, parseISO } from "date-fns";
 import { usePostBooking } from "../api/post-booking";

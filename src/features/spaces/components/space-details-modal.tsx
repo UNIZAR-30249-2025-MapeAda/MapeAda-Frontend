@@ -4,7 +4,7 @@ import { Space } from "../types/models";
 import { spaceTypes } from "../types/enums";
 import { ErrorMessage } from "../../../components/errors/error-message";
 import { LoadingIndicator } from "../../../components/ui/loading-indicator";
-import { useGetBuilding } from "../../building/api/get-buiding";
+import { useGetBuilding } from "../../building/api/get-building";
 import { Building } from "../../building/types/models";
 import { useUser } from "../../../lib/auth";
 import { Link } from "react-router";

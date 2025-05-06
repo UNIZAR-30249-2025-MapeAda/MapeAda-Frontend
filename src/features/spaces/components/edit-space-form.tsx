@@ -4,7 +4,7 @@ import { spaceTypes } from "../types/enums";
 import { Select } from "../../../components/ui/select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { useGetBuilding } from "../../building/api/get-buiding";
+import { useGetBuilding } from "../../building/api/get-building";
 import { ErrorMessage } from "../../../components/errors/error-message";
 import { LoadingIndicator } from "../../../components/ui/loading-indicator";
 import Swal from "sweetalert2";
