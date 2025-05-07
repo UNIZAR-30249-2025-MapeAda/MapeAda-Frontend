@@ -4,9 +4,8 @@ type Intervalo = {
 };
 
 type Schedule = {
-  date: Date;
-  isHoliday: boolean;
-  schedule?: Intervalo;
+  fecha: Date;
+  intervalo?: Intervalo;
 };
 
 type Porcentaje = {

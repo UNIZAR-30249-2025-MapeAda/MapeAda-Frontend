@@ -4,6 +4,7 @@ import { Building } from "../../building/types/models";
 import { Booking } from "../types/models";
 import { ErrorMessage } from "../../../components/errors/error-message";
 import { Space } from "../../spaces/types/models";
+import { format, parseISO } from "date-fns";
 
 interface DurationStepProps {
   fecha: string;
@@ -50,12 +51,19 @@ const DurationStep: React.FC<DurationStepProps> = ({
       endMin = Math.min(...ends);
     } else {
       // horario por defecto del edificio
-      startMin = parseMinutes(
-        building.calendarioApertura.intervaloPorDefecto.inicio
-      );
-      endMin = parseMinutes(
-        building.calendarioApertura.intervaloPorDefecto.fin
-      );
+      const intervaloCustom = building.calendarioApertura.horariosApertura.find((h) => format(new Date(h.fecha), "dd/MM/yyyy") === fecha)?.intervalo;
+
+      if (intervaloCustom) {
+        startMin = parseMinutes(intervaloCustom.inicio);
+        endMin = parseMinutes(intervaloCustom.fin);
+      } else {
+        startMin = parseMinutes(
+          building.calendarioApertura.intervaloPorDefecto.inicio
+        );
+        endMin = parseMinutes(
+          building.calendarioApertura.intervaloPorDefecto.fin
+        );
+      }
     }
 
     const generated: string[] = [];

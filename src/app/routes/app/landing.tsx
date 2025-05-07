@@ -71,7 +71,7 @@ function Landing() {
   useEffect(() => {
     if (alertDismissed || bookings.length === 0) return;
 
-    const invalid = bookings.filter(b => !b.valida || b.invalidSince);
+    const invalid = bookings.filter(b => (!b.valida || b.invalidSince) && !b.deletedAt);
     const deletedByOthers = bookings.filter(
       b => b.deletedAt && (!b.deletedBy || b.deletedBy !== user.data!.nip)
     );

@@ -22,16 +22,11 @@ const DateStep: React.FC<DateStepProps> = ({ fecha, setFecha, building }) => {
     const isDefaultWorkday = (diasPorDefecto & mask) !== 0;
 
     const override = horariosApertura.find(
-      (r) => new Date(r.date).toDateString() === date.toDateString()
+      (r) => new Date(r.fecha).toDateString() === date.toDateString()
     );
 
     if (override) {
-      if (override.isHoliday) {
-        return false;
-      }
-      if (override.schedule) {
-        return true;
-      }
+      return override.intervalo;
     }
 
     if (!isDefaultWorkday) {

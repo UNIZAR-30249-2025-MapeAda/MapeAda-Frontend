@@ -46,15 +46,15 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
     const isDefaultWorkday = (diasPorDefecto & mask) !== 0;
 
     const override = horariosApertura.find(
-      (r) => new Date(r.date).toDateString() === today.toDateString()
+      (r) => new Date(r.fecha).toDateString() === today.toDateString()
     );
 
     if (override) {
-      if (override.isHoliday) {
+      if (override.festivo) {
         return "Día festivo";
       }
-      if (override.schedule) {
-        const { inicio, fin } = override.schedule;
+      if (override.intervalo) {
+        const { inicio, fin } = override.intervalo;
         return `${formatHM(inicio)} - ${formatHM(fin)}`;
       }
     }
