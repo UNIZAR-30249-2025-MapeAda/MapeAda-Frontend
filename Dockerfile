@@ -1,25 +1,37 @@
-# Etapa 1: Construcción de la aplicación con Node.js
-FROM node:18 as build
+########################  Etapa 1  — Build con Vite  ########################
+FROM node:18-alpine AS build
 
 WORKDIR /app
+
+# 1. Dependencias
 COPY package*.json ./
-RUN npm install
+RUN npm ci
+
+# 2. Código fuente
 COPY . .
-RUN npm run build
 
-# Etapa 2: Nginx con HTTP/3 y HTTPS
-FROM nginx:alpine
+# 3. Variables de entorno que Vite necesita en compile-time
+ARG VITE_API_URL
+ARG VITE_PYGEOAPI_URL
+ENV VITE_API_URL=$VITE_API_URL \
+    VITE_PYGEOAPI_URL=$VITE_PYGEOAPI_URL
 
-# Copiar los certificados y la configuración de Nginx
-COPY nginx/cert.pem /etc/nginx/cert.pem
-COPY nginx/privkey.pem /etc/nginx/privkey.pem
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+# 4. Build estático (dist/)
+RUN npm run build   # genera /app/dist
 
-# Copiar la aplicación construida
-COPY --from=build /app/build /usr/share/nginx/html
+########################  Etapa 2  — Nginx en runtime  ######################
+FROM nginx:stable-alpine
 
-# Exponer los puertos 80
-EXPOSE 80 443
+# 5. Puerto que Render inyecta (o 80 en local)
+ENV PORT=${PORT:-80}
 
-# Iniciar Nginx en primer plano
-CMD ["nginx", "-g", "daemon off;"]
+# 6. Config: templated para escuchar en $PORT y soportar SPA (React Router)
+COPY nginx/nginx.conf.template /etc/nginx/templates/default.conf.template
+
+# 7. Archivos estáticos
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# 8. Arranque — genera la conf final con el puerto correcto
+CMD sh -c "envsubst '\$PORT' < /etc/nginx/templates/default.conf.template \
+           > /etc/nginx/conf.d/default.conf && \
+           nginx -g 'daemon off;'"
