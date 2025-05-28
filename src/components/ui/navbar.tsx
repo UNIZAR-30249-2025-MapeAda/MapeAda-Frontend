@@ -1,4 +1,4 @@
-import { FC, ChangeEvent, useState } from "react";
+import { FC, ChangeEvent, KeyboardEvent, useState } from "react";
 import { Select } from "./select";
 import { UserMenu } from "./user-menu";
 import SearchBar from "./search-bar";

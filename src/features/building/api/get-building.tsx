@@ -6,7 +6,7 @@ import { api } from "../../../lib/api-client";
 const getBuilding = async (): Promise<Building> => {
   const calendar: GetBuildingResponse = await api.get("/api/building");
 
-  return calendar;
+  return calendar as unknown as Building;
 };
 
 export const useGetBuilding = (options?: UseQueryOptions<Building, Error>) => {

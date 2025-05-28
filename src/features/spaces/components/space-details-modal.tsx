@@ -50,12 +50,11 @@ const SpaceDetailsModal: React.FC<SpaceDetailsModalProps> = ({
     );
 
     if (override) {
-      if (override.festivo) {
-        return "Día festivo";
-      }
       if (override.intervalo) {
         const { inicio, fin } = override.intervalo;
         return `${formatHM(inicio)} - ${formatHM(fin)}`;
+      } else {
+        return "Día festivo";
       }
     }
 

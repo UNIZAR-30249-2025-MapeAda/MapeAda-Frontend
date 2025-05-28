@@ -4,7 +4,7 @@ import { Building } from "../../building/types/models";
 import { Booking } from "../types/models";
 import { ErrorMessage } from "../../../components/errors/error-message";
 import { Space } from "../../spaces/types/models";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 
 interface DurationStepProps {
   fecha: string;

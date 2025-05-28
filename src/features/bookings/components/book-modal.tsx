@@ -19,7 +19,7 @@ import { addHours, formatISO, parse, parseISO } from "date-fns";
 import { usePostBooking } from "../api/post-booking";
 import { PostBookingRequest } from "../../../types/api";
 import { useUser } from "../../../lib/auth";
-import { bookingUsages } from "../types/enums";
+import { BookingUsage, bookingUsages } from "../types/enums";
 import emitter from "../../../utils/emitter";
 import { showApiError } from "../../../utils/error";
 
@@ -147,7 +147,7 @@ const BookModal: React.FC<BookModalProps> = ({ spaces, show, handleClose }) => {
     const request: PostBookingRequest = {
       nip: user.data!.nip,
       espacios: spaces.map((s) => String(s.id)),
-      uso: bookingUsages.indexOf(uso),
+      uso: bookingUsages.indexOf(uso as BookingUsage),
       asistentes,
       periodo: {
         inicio: inicioIso,

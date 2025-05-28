@@ -1,6 +1,6 @@
 import Swal from "sweetalert2";
 
-export function getApiErrorMessage(error: unknown): string {
+export function getApiErrorMessage(error: any): string {
   const errorsObj = error.response?.data?.errors;
   return errorsObj && typeof errorsObj === "object"
     ? Object.keys(errorsObj).flat().filter(Boolean).join(", ")

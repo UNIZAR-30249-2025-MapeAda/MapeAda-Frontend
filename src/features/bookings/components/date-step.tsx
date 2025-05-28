@@ -26,7 +26,7 @@ const DateStep: React.FC<DateStepProps> = ({ fecha, setFecha, building }) => {
     );
 
     if (override) {
-      return override.intervalo;
+      return override.intervalo ? true : false;
     }
 
     if (!isDefaultWorkday) {
